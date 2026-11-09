@@ -1643,4 +1643,66 @@ body.light-theme .brand-text h1 {
   color: var(--cyan);
 }
 
+/* ==========================================================================
+   LOGIN GATE SCREEN (HOME ACCESS CONTROL)
+   ========================================================================== */
+.login-gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: radial-gradient(circle at 50% 20%, rgba(0, 242, 254, 0.12) 0%, rgba(10, 14, 23, 0.98) 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.login-gate-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-highlight);
+  border-radius: var(--radius-xl);
+  padding: 2.25rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg), 0 0 35px rgba(0, 242, 254, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+}
+
+.gate-demo-cta {
+  text-align: center;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.gate-demo-text {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.gate-demo-link {
+  color: #25D366; /* WhatsApp Brand Color */
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.gate-demo-link:hover {
+  color: #3bf17e;
+  text-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
+}
+
+
 

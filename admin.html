@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sport Click Stats | Panel de Super Administrador (/admin)</title>
+  <meta name="description" content="Dashboard de administración para gestionar usuarios, perfiles de anotadores y partidos de Sport Click Stats.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .admin-gate-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: radial-gradient(circle at top, rgba(0, 242, 254, 0.08) 0%, var(--bg-base) 70%);
+    }
+
+    .admin-login-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-highlight);
+      border-radius: var(--radius-xl);
+      padding: 2.25rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg), 0 0 30px rgba(0, 242, 254, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .admin-dashboard-wrap {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .admin-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .admin-kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .kpi-num {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .password-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .status-badge-active {
+      background: var(--emerald-dark);
+      color: var(--emerald);
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.72rem;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge-inactive {
+      background: var(--crimson-dark);
+      color: var(--crimson);
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.72rem;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    @media (max-width: 900px) {
+      .admin-kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .admin-kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================================
+       1. PANTALLA DE ACCESO SUPER ADMIN (/admin)
+       ========================================================================= -->
+  <div id="adminGateScreen" class="admin-gate-wrap">
+    <div class="admin-login-card">
+      <div style="text-align:center;">
+        <div style="width:60px; height:60px; border-radius:var(--radius-lg); background:linear-gradient(135deg, var(--cyan) 0%, var(--violet) 100%); display:inline-flex; align-items:center; justify-content:center; font-size:1.8rem; box-shadow:0 0 20px var(--cyan-glow); margin-bottom:0.75rem;">
+          🛡️
+        </div>
+        <h2 style="font-size:1.35rem; font-weight:800; letter-spacing:-0.02em;">Panel Maestro /admin</h2>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">Sport Click Stats • Control de Administrador</div>
+      </div>
+
+      <form id="adminLoginForm" style="display:flex; flex-direction:column; gap:0.9rem;">
+        <div class="form-group">
+          <label class="form-label">Usuario o Correo de Administrador</label>
+          <input type="text" id="adminUserField" class="form-input" placeholder="admin@sportclick.com" required value="admin@sportclick.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Clave Maestra</label>
+          <input type="password" id="adminPassField" class="form-input" placeholder="••••••••" required value="admin2026">
+        </div>
+
+        <button type="submit" class="btn-nav btn-primary" style="justify-content:center; padding:0.75rem; font-size:0.9rem; margin-top:0.4rem;">
+          Acceder al Dashboard Admin 🛡️
+        </button>
+      </form>
+
+      <div style="text-align:center; padding-top:0.75rem; border-top:1px solid var(--border-subtle);">
+        <a href="/" style="font-size:0.8rem; color:var(--text-secondary); text-decoration:none;">
+          ⬅️ Volver a la App de Anotación
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       2. WORKSPACE DE DASHBOARD SUPER ADMIN
+       ========================================================================= -->
+  <div id="adminDashboardView" class="admin-dashboard-wrap">
+    
+    <!-- Top Navbar Admin -->
+    <header class="top-navbar">
+      <div class="brand-wrapper">
+        <div class="brand-icon" style="background:linear-gradient(135deg, var(--violet) 0%, var(--cyan) 100%);">🛡️</div>
+        <div class="brand-text">
+          <h1>Sport Click Stats</h1>
+          <div class="brand-tag" style="color:var(--violet);">PANEL MAESTRO DE ADMINISTRACIÓN</div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <span class="card-pill" style="border-color:var(--emerald); color:var(--emerald);">
+          ● Super Admin Conectado
+        </span>
+        <a href="/" class="btn-nav" title="Abrir interfaz de anotación">
+          <span>⚾</span>
+          <span>Ir a la App Principal</span>
+        </a>
+        <button id="adminLogoutBtn" class="btn-nav" style="border-color:var(--crimson); color:var(--crimson);" title="Cerrar sesión de administrador">
+          <span>🚪</span>
+          <span>Salir</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Admin Container -->
+    <main class="main-wrapper">
+      
+      <!-- KPIs Bento Grid -->
+      <section class="admin-kpi-grid">
+        <div class="admin-kpi-card">
+          <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Anotadores Registrados</span>
+          <div id="kpiTotalUsers" class="kpi-num" style="color:var(--cyan);">0</div>
+          <span style="font-size:0.72rem; color:var(--text-secondary);">Usuarios con acceso oficial</span>
+        </div>
+
+        <div class="admin-kpi-card">
+          <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Partidos Registrados</span>
+          <div id="kpiTotalGames" class="kpi-num" style="color:var(--emerald);">0</div>
+          <span style="font-size:0.72rem; color:var(--text-secondary);">Historial y partidos activos</span>
+        </div>
+
+        <div class="admin-kpi-card">
+          <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Total Innings Anotados</span>
+          <div id="kpiTotalInnings" class="kpi-num" style="color:var(--violet);">0</div>
+          <span style="font-size:0.72rem; color:var(--text-secondary);">Media entradas procesadas</span>
+        </div>
+
+        <div class="admin-kpi-card">
+          <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Supabase Cloud DB</span>
+          <div id="kpiDbStatus" class="kpi-num" style="font-size:1.4rem; color:var(--emerald); margin-top:0.3rem;">🟢 En Línea</div>
+          <span id="kpiDbUrl" style="font-size:0.72rem; color:var(--text-secondary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">
+            https://tvdrmjndvevsfvtbtvtj.supabase.co
+          </span>
+        </div>
+      </section>
+
+      <!-- Panel de Gestión de Anotadores / Usuarios -->
+      <section class="bento-card" style="margin-bottom:1.5rem;">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">👥</span>
+            <span>Gestión de Anotadores Oficiales y Credenciales de Acceso</span>
+          </h2>
+          <span class="card-pill">Control de Acceso</span>
+        </div>
+
+        <!-- Formulario Crear Nuevo Anotador -->
+        <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.25rem;">
+          <h3 style="font-size:0.9rem; font-weight:700; color:var(--cyan); margin-bottom:0.75rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>➕</span>
+            <span>Crear Nuevo Usuario Anotador</span>
+          </h3>
+
+          <form id="createScorerForm" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; align-items:end;">
+            <div class="form-group">
+              <label class="form-label">Nombre Completo</label>
+              <input type="text" id="newScorerName" class="form-input" placeholder="Ej. Roberto Alomar" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Correo / Usuario de Ingreso</label>
+              <input type="email" id="newScorerEmail" class="form-input" placeholder="anotador@liga.com" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Contraseña de Acceso</label>
+              <input type="text" id="newScorerPassword" class="form-input" placeholder="Clave de acceso" required value="anotador2026">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Licencia / Credencial</label>
+              <input type="text" id="newScorerLicense" class="form-input" placeholder="Ej. WBSC Nivel II / Cert. #44" required value="WBSC Nivel II">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Rol del Anotador</label>
+              <select id="newScorerRole" class="form-input" style="cursor:pointer;">
+                <option value="Anotador Oficial">Anotador Oficial</option>
+                <option value="Anotador Titular">Anotador Titular</option>
+                <option value="Anotador en Prácticas">Anotador en Prácticas</option>
+                <option value="Comisario Técnico">Comisario Técnico</option>
+              </select>
+            </div>
+
+            <div>
+              <button type="submit" class="btn-nav btn-primary" style="height:42px; width:100%; justify-content:center;">
+                ➕ Registrar Anotador
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tabla de Anotadores Registrados -->
+        <h4 style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.5rem;">
+          Anotadores con Acceso al Sistema
+        </h4>
+
+        <div class="table-responsive-wrapper">
+          <table class="stats-data-table">
+            <thead>
+              <tr>
+                <th>Anotador</th>
+                <th>Usuario / Email</th>
+                <th>Contraseña</th>
+                <th>Licencia</th>
+                <th>Rol</th>
+                <th>Partidos</th>
+                <th>Estado</th>
+                <th style="text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="scorersTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Panel de Supervisión Global de Partidos -->
+      <section class="bento-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">⚾</span>
+            <span>Historial Global de Partidos en el Sistema</span>
+          </h2>
+          <span class="card-pill">Auditoría y Supervisión</span>
+        </div>
+
+        <div class="table-responsive-wrapper">
+          <table class="stats-data-table">
+            <thead>
+              <tr>
+                <th>Fecha / Hora</th>
+                <th>Torneo / Liga</th>
+                <th>Encuentro (Visitante vs Home Club)</th>
+                <th>Marcador</th>
+                <th>Inning</th>
+                <th>Estado</th>
+                <th style="text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="globalGamesTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Admin -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div>Sport Click Stats 2026 • Panel de Super Administrador (/admin)</div>
+        <div class="footer-dev">
+          Desarrollado por 
+          <a href="https://wa.me/584122053591" target="_blank" rel="noopener noreferrer" class="dev-link" title="Contactar a Henry Macho en WhatsApp">
+            <span>Henry Macho</span>
+            <span class="wa-icon">💬</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/storage.js"></script>
+  <script>
+    // Admin Dashboard Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      initAdminAuth();
+      attachAdminEvents();
+    });
+
+    function initAdminAuth() {
+      const isAuth = StorageService.isAdminLoggedIn();
+      if (isAuth) {
+        showDashboard();
+      } else {
+        showLoginGate();
+      }
+    }
+
+    function showLoginGate() {
+      document.getElementById('adminGateScreen').style.display = 'flex';
+      document.getElementById('adminDashboardView').style.display = 'none';
+    }
+
+    function showDashboard() {
+      document.getElementById('adminGateScreen').style.display = 'none';
+      document.getElementById('adminDashboardView').style.display = 'flex';
+      renderAdminKPIs();
+      renderScorersTable();
+      renderGlobalGamesTable();
+    }
+
+    function attachAdminEvents() {
+      // Login Form
+      document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = document.getElementById('adminUserField').value.trim();
+        const pass = document.getElementById('adminPassField').value.trim();
+
+        if (StorageService.authenticateAdmin(user, pass)) {
+          showToast('Bienvenido, Super Administrador');
+          showDashboard();
+        } else {
+          alert('Credenciales incorrectas de administrador. Verifica tu usuario y clave maestra.');
+        }
+      });
+
+      // Logout
+      document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+        StorageService.logoutAdmin();
+        showLoginGate();
+        showToast('Sesión de administrador cerrada');
+      });
+
+      // Create Scorer Form
+      document.getElementById('createScorerForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('newScorerName').value.trim();
+        const email = document.getElementById('newScorerEmail').value.trim();
+        const password = document.getElementById('newScorerPassword').value.trim();
+        const license = document.getElementById('newScorerLicense').value.trim();
+        const role = document.getElementById('newScorerRole').value;
+
+        if (!name || !email || !password) {
+          showToast('Completa todos los campos obligatorios');
+          return;
+        }
+
+        const newUser = {
+          id: 'usr_' + Date.now(),
+          name,
+          email,
+          password,
+          license,
+          role,
+          status: 'Activo',
+          createdAt: new Date().toISOString(),
+          gamesScored: 0,
+          inningsLogged: 0,
+          playsProcessed: 0
+        };
+
+        StorageService.saveUser(newUser);
+
+        // Reset form
+        document.getElementById('newScorerName').value = '';
+        document.getElementById('newScorerEmail').value = '';
+        document.getElementById('newScorerPassword').value = 'anotador2026';
+
+        renderScorersTable();
+        renderAdminKPIs();
+        showToast(`Anotador ${name} creado con éxito. Ya puede ingresar en el home.`);
+      });
+    }
+
+    function renderAdminKPIs() {
+      const users = StorageService.getUsersList();
+      const games = StorageService.getGamesHistory();
+
+      let totalInnings = 0;
+      users.forEach(u => totalInnings += (u.inningsLogged || 0));
+
+      document.getElementById('kpiTotalUsers').textContent = users.length;
+      document.getElementById('kpiTotalGames').textContent = games.length;
+      document.getElementById('kpiTotalInnings').textContent = totalInnings;
+
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        const config = SupabaseService.getConfig();
+        document.getElementById('kpiDbStatus').textContent = '🟢 En Línea';
+        document.getElementById('kpiDbUrl').textContent = config.url;
+      } else {
+        document.getElementById('kpiDbStatus').textContent = '⚪ LocalStorage';
+        document.getElementById('kpiDbUrl').textContent = 'Configurar en la app principal';
+      }
+    }
+
+    function renderScorersTable() {
+      const users = StorageService.getUsersList();
+      const tbody = document.getElementById('scorersTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = users.map((u, idx) => `
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}</td>
+          <td>
+            <div class="password-toggle-wrap">
+              <span id="passSpan_${u.id}">••••••••</span>
+              <button type="button" class="btn-nav" style="padding:0.15rem 0.4rem; font-size:0.7rem;" onclick="togglePasswordVisibility('${u.id}', '${u.password}')">
+                👁️
+              </button>
+            </div>
+          </td>
+          <td>${u.license || 'Oficial'}</td>
+          <td><span class="card-pill">${u.role || 'Anotador'}</span></td>
+          <td><strong>${u.gamesScored || 0}</strong></td>
+          <td>
+            <span class="${u.status === 'Inactivo' ? 'status-badge-inactive' : 'status-badge-active'}">
+              ${u.status || 'Activo'}
+            </span>
+          </td>
+          <td style="text-align:center;">
+            <div style="display:flex; justify-content:center; gap:0.3rem;">
+              <button class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="toggleScorerStatus('${u.id}')" title="Alternar Activo/Inactivo">
+                ${u.status === 'Inactivo' ? 'Activar' : 'Pausar'}
+              </button>
+              <button class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem; border-color:var(--crimson); color:var(--crimson);" onclick="deleteScorerEntry('${u.id}')" title="Eliminar anotador">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderGlobalGamesTable() {
+      const games = StorageService.getGamesHistory();
+      const tbody = document.getElementById('globalGamesTableBody');
+      if (!tbody) return;
+
+      if (games.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; color:var(--text-muted); padding:1.5rem;">
+              No hay partidos registrados aún en el sistema.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = games.map(g => `
+        <tr>
+          <td>${new Date(g.savedAt).toLocaleString()}</td>
+          <td>${g.leagueName || 'Liga Oficial'}</td>
+          <td>
+            <strong>${g.visitor.name}</strong> vs <strong>${g.home.name}</strong>
+          </td>
+          <td style="font-weight:800; color:var(--cyan);">
+            ${g.visitor.score} - ${g.home.score}
+          </td>
+          <td>${g.inning}ra entrada</td>
+          <td>
+            <span class="${g.status === 'Finalizado' ? 'status-badge-active' : 'card-pill'}">
+              ${g.status || 'En progreso'}
+            </span>
+          </td>
+          <td style="text-align:center;">
+            <button class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem; border-color:var(--crimson); color:var(--crimson);" onclick="deleteGameGlobal('${g.id}')">
+              🗑️ Eliminar
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.togglePasswordVisibility = function(userId, realPassword) {
+      const span = document.getElementById(`passSpan_${userId}`);
+      if (span.textContent === '••••••••') {
+        span.textContent = realPassword;
+        span.style.color = 'var(--cyan)';
+        span.style.fontFamily = 'monospace';
+      } else {
+        span.textContent = '••••••••';
+        span.style.color = 'inherit';
+        span.style.fontFamily = 'inherit';
+      }
+    };
+
+    window.toggleScorerStatus = function(userId) {
+      const users = StorageService.getUsersList();
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        user.status = user.status === 'Inactivo' ? 'Activo' : 'Inactivo';
+        StorageService.saveUser(user);
+        renderScorersTable();
+        showToast(`Estado de ${user.name} actualizado a ${user.status}`);
+      }
+    };
+
+    window.deleteScorerEntry = function(userId) {
+      if (confirm('¿Estás seguro de que deseas eliminar este anotador? Perderá acceso a la plataforma.')) {
+        StorageService.deleteUser(userId);
+        renderScorersTable();
+        renderAdminKPIs();
+        showToast('Anotador eliminado');
+      }
+    };
+
+    window.deleteGameGlobal = function(gameId) {
+      if (confirm('¿Eliminar este partido del registro global?')) {
+        StorageService.deleteGame(gameId);
+        renderGlobalGamesTable();
+        renderAdminKPIs();
+        showToast('Partido eliminado');
+      }
+    };
+
+    function showToast(msg) {
+      const cont = document.getElementById('toastContainer');
+      if (!cont) return;
+      const t = document.createElement('div');
+      t.className = 'toast-message';
+      t.innerHTML = `<span>🛡️</span> <span>${msg}</span>`;
+      cont.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 2800);
+    }
+  </script>
+</body>
+</html>

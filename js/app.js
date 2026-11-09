@@ -180,10 +180,21 @@ function toggleTheme() {
  * Initialize User Session and Profile UI
  */
 function initUserSession() {
+  const gate = document.getElementById('loginGateScreen');
+  if (!StorageService.isUserLoggedIn()) {
+    if (gate) gate.style.display = 'flex';
+    if (DOM.userNameSm) DOM.userNameSm.textContent = 'Ingresar';
+    if (DOM.userAvatarSm) DOM.userAvatarSm.textContent = '🔒';
+    return;
+  }
+
+  if (gate) gate.style.display = 'none';
   const user = StorageService.getUser();
-  const initials = user.name.split(' ').map(n => n[0]).slice(0, 2).join('');
-  DOM.userAvatarSm.textContent = initials;
-  DOM.userNameSm.textContent = user.name;
+  if (user && user.name) {
+    const initials = user.name.split(' ').map(n => n[0]).slice(0, 2).join('');
+    if (DOM.userAvatarSm) DOM.userAvatarSm.textContent = initials;
+    if (DOM.userNameSm) DOM.userNameSm.textContent = user.name;
+  }
 }
 
 /**
@@ -237,18 +248,75 @@ function attachEventListeners() {
   DOM.modeDetailedBtn.addEventListener('click', () => switchScoringMode('detailed'));
 
   // User Profile & Auth
-  DOM.userBadgeBtn.addEventListener('click', openProfileModal);
-  DOM.quickDemoLoginBtn.addEventListener('click', () => {
+  DOM.userBadgeBtn.addEventListener('click', () => {
+    if (!StorageService.isUserLoggedIn()) {
+      const gate = document.getElementById('loginGateScreen');
+      if (gate) gate.style.display = 'flex';
+    } else {
+      openProfileModal();
+    }
+  });
+
+  DOM.quickDemoLoginBtn?.addEventListener('click', () => {
     StorageService.setUser(DEFAULT_USER);
     initUserSession();
     closeAllModals();
     showToast('¡Sesión iniciada con éxito como Anotador Oficial WBSC!');
   });
-  DOM.logoutBtn.addEventListener('click', () => {
+
+  DOM.logoutBtn?.addEventListener('click', () => {
     StorageService.logoutUser();
     closeAllModals();
-    openAuthModal();
+    initUserSession();
+    showToast('Sesión cerrada correctamente');
   });
+
+  // Login Gate Interactions
+  const gateLoginForm = document.getElementById('gateLoginForm');
+  const gateUserField = document.getElementById('gateUserField');
+  const gatePassField = document.getElementById('gatePassField');
+  const gateErrorMsg = document.getElementById('gateErrorMsg');
+  const gateQuickDemoBtn = document.getElementById('gateQuickDemoBtn');
+  const gateTogglePassBtn = document.getElementById('gateTogglePassBtn');
+
+  if (gateTogglePassBtn && gatePassField) {
+    gateTogglePassBtn.addEventListener('click', () => {
+      const isPass = gatePassField.type === 'password';
+      gatePassField.type = isPass ? 'text' : 'password';
+      gateTogglePassBtn.textContent = isPass ? '🔒' : '👁️';
+    });
+  }
+
+  if (gateLoginForm) {
+    gateLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const userOrEmail = gateUserField.value.trim();
+      const pass = gatePassField.value.trim();
+
+      const authenticated = StorageService.authenticateUser(userOrEmail, pass);
+      if (authenticated) {
+        if (gateErrorMsg) gateErrorMsg.style.display = 'none';
+        initUserSession();
+        showToast(`¡Bienvenido(a), ${authenticated.name}!`);
+      } else {
+        if (gateErrorMsg) {
+          gateErrorMsg.textContent = 'Usuario o contraseña incorrectos. Verifica tus datos o pide tu demo en el enlace inferior.';
+          gateErrorMsg.style.display = 'block';
+        }
+      }
+    });
+  }
+
+  if (gateQuickDemoBtn) {
+    gateQuickDemoBtn.addEventListener('click', () => {
+      const users = StorageService.getUsersList();
+      const demoUser = users[0] || DEFAULT_USER;
+      StorageService.setUser(demoUser);
+      if (gateErrorMsg) gateErrorMsg.style.display = 'none';
+      initUserSession();
+      showToast(`¡Bienvenido(a), ${demoUser.name}!`);
+    });
+  }
 
   // Fast Mode Scoring Buttons
   document.querySelectorAll('[data-hit]').forEach(btn => {

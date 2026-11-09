@@ -7,8 +7,74 @@
   <meta name="description" content="Plataforma profesional de anotación de béisbol y sóftbol en tiempo real con estadísticas avanzadas de lanzadores, receptores y bateadores.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚾</text></svg>">
   <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Acceso directo a /admin sin botones visibles en el home
+    if (window.location.pathname === '/admin' || window.location.pathname === '/admin/' || window.location.hash === '#/admin') {
+      window.location.replace('/admin.html');
+    }
+  </script>
 </head>
 <body>
+
+  <!-- Login Gate Screen (Gating access until authenticated) -->
+  <div id="loginGateScreen" class="login-gate-overlay" style="display: none;">
+    <div class="login-gate-card">
+      <div style="text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 0.25rem; filter: drop-shadow(0 0 12px var(--cyan-glow));">⚾</div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #8B5CF6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          Sport Click Stats
+        </h2>
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyan); font-weight: 700; margin-top: 0.2rem;">
+          app de anotación
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: -0.3rem;">
+        <span class="card-pill" style="border-color: var(--cyan); color: var(--cyan); font-size: 0.72rem;">
+          🔐 Acceso Exclusivo para Anotadores
+        </span>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.5rem; line-height: 1.4;">
+          Ingresa con tu usuario y contraseña autorizados para abrir la interfaz técnica de anotación.
+        </p>
+      </div>
+
+      <form id="gateLoginForm" style="display: flex; flex-direction: column; gap: 0.9rem;">
+        <div class="form-group">
+          <label class="form-label" for="gateUserField">Usuario o Correo Electrónico</label>
+          <input type="text" id="gateUserField" class="form-input" placeholder="Ej. carlos.mendoza@wbsc.org o tu usuario" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="gatePassField">Contraseña</label>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="gatePassField" class="form-input" placeholder="••••••••" required autocomplete="current-password" style="padding-right: 2.5rem; width: 100%;">
+            <button type="button" id="gateTogglePassBtn" style="position: absolute; right: 0.6rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 0.2rem;" title="Mostrar / ocultar contraseña">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div id="gateErrorMsg" style="display: none; padding: 0.6rem 0.8rem; background: var(--crimson-dark); border: 1px solid var(--crimson); border-radius: var(--radius-sm); color: #FFF; font-size: 0.78rem; font-weight: 600;">
+        </div>
+
+        <button type="submit" class="btn-nav btn-primary" style="height: 44px; justify-content: center; font-size: 0.95rem; font-weight: 700; width: 100%;">
+          <span>⚾</span>
+          <span>Ingresar a Sport Click Stats</span>
+        </button>
+
+        <button type="button" id="gateQuickDemoBtn" class="btn-nav" style="height: 38px; justify-content: center; font-size: 0.82rem; border-color: var(--border-subtle); color: var(--text-secondary); width: 100%;">
+          <span>⚡</span>
+          <span>Entrar con Cuenta Demo Oficial</span>
+        </button>
+      </form>
+
+      <div class="gate-demo-cta">
+        <p class="gate-demo-text">
+          ¿Quieres probarlo? <a href="https://wa.me/584122053591?text=Hola,%20quiero%20probar%20la%20demo%20de%20Sport%20Click%20Stats" target="_blank" rel="noopener noreferrer" class="gate-demo-link">Pide tu demo aquí 💬</a>
+        </p>
+      </div>
+    </div>
+  </div>
 
   <!-- Print Only Header for PDF Generation -->
   <div class="print-only-header">
