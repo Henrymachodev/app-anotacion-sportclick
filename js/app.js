@@ -288,20 +288,40 @@ function attachEventListeners() {
   }
 
   if (gateLoginForm) {
-    gateLoginForm.addEventListener('submit', (e) => {
+    gateLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const userOrEmail = gateUserField.value.trim();
       const pass = gatePassField.value.trim();
 
-      const authenticated = StorageService.authenticateUser(userOrEmail, pass);
-      if (authenticated) {
-        if (gateErrorMsg) gateErrorMsg.style.display = 'none';
-        initUserSession();
-        showToast(`¡Bienvenido(a), ${authenticated.name}!`);
-      } else {
+      const submitBtn = gateLoginForm.querySelector('button[type="submit"]');
+      const origHtml = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.innerHTML = '<span>⏳</span><span>Verificando acceso...</span>';
+        submitBtn.disabled = true;
+      }
+
+      try {
+        const authenticated = await StorageService.authenticateUser(userOrEmail, pass);
+        if (authenticated) {
+          if (gateErrorMsg) gateErrorMsg.style.display = 'none';
+          initUserSession();
+          showToast(`¡Bienvenido(a), ${authenticated.name}!`);
+        } else {
+          if (gateErrorMsg) {
+            gateErrorMsg.textContent = 'Usuario o contraseña incorrectos. Verifica tus datos o pide tu demo en el enlace inferior.';
+            gateErrorMsg.style.display = 'block';
+          }
+        }
+      } catch (err) {
+        console.error('Error en autenticación:', err);
         if (gateErrorMsg) {
-          gateErrorMsg.textContent = 'Usuario o contraseña incorrectos. Verifica tus datos o pide tu demo en el enlace inferior.';
+          gateErrorMsg.textContent = 'Ocurrió un error al verificar credenciales. Intenta de nuevo.';
           gateErrorMsg.style.display = 'block';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.innerHTML = origHtml;
+          submitBtn.disabled = false;
         }
       }
     });

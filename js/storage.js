@@ -16,6 +16,19 @@ const STORAGE_KEYS = {
 
 const DEFAULT_USERS_DATABASE = [
   {
+    id: 'usr-admin-henry',
+    name: 'Henry Macho',
+    email: 'henrymacho87@gmail.com',
+    password: 'anotador2026',
+    license: 'Certificado Máster Sport Click #001',
+    role: 'Anotador Oficial y Administrador',
+    status: 'Activo',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    gamesScored: 30,
+    inningsLogged: 270,
+    playsProcessed: 1850
+  },
+  {
     id: 'usr-official-01',
     name: 'Lic. Carlos Mendoza',
     email: 'carlos.mendoza@wbsc.org',
@@ -46,49 +59,77 @@ const DEFAULT_USERS_DATABASE = [
 const DEFAULT_USER = DEFAULT_USERS_DATABASE[0];
 
 const DEFAULT_METRICS = {
-  gamesScored: 24,
-  inningsLogged: 208,
-  playsProcessed: 1420
+  gamesScored: 30,
+  inningsLogged: 270,
+  playsProcessed: 1850
 };
 
 const StorageService = {
-  // --- Registered Users Database (Managed by Admin) ---
+  // --- Registered Users Database (Managed by Admin & Cloud) ---
   getUsersList() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.USERS_LIST);
-      if (!data) {
-        localStorage.setItem(STORAGE_KEYS.USERS_LIST, JSON.stringify(DEFAULT_USERS_DATABASE));
-        return DEFAULT_USERS_DATABASE;
+      let list = data ? JSON.parse(data) : [];
+      if (!Array.isArray(list) || list.length === 0) {
+        list = [...DEFAULT_USERS_DATABASE];
+      } else {
+        // Garantizar que usuarios por defecto (incluyendo Henry Macho) siempre estén registrados
+        DEFAULT_USERS_DATABASE.forEach(defUser => {
+          const exists = list.some(u => 
+            (u.email && u.email.toLowerCase() === defUser.email.toLowerCase()) ||
+            u.id === defUser.id
+          );
+          if (!exists) {
+            list.push(defUser);
+          }
+        });
       }
-      return JSON.parse(data);
+      localStorage.setItem(STORAGE_KEYS.USERS_LIST, JSON.stringify(list));
+      return list;
     } catch (e) {
       return DEFAULT_USERS_DATABASE;
     }
   },
 
-  saveUser(userObj) {
+  async saveUser(userObj) {
     try {
       const users = this.getUsersList();
-      const existingIdx = users.findIndex(u => u.id === userObj.id || (u.email && u.email.toLowerCase() === userObj.email.toLowerCase()));
+      const cleanEmail = (userObj.email || '').trim().toLowerCase();
+      const existingIdx = users.findIndex(u => 
+        (u.id && u.id === userObj.id) || 
+        (u.email && u.email.toLowerCase() === cleanEmail)
+      );
+
+      const normalizedUser = {
+        id: userObj.id || 'usr_' + Date.now(),
+        createdAt: userObj.createdAt || new Date().toISOString(),
+        status: userObj.status || 'Activo',
+        gamesScored: userObj.gamesScored || 0,
+        inningsLogged: userObj.inningsLogged || 0,
+        playsProcessed: userObj.playsProcessed || 0,
+        ...userObj,
+        email: cleanEmail,
+        password: (userObj.password || '').trim()
+      };
+
       if (existingIdx >= 0) {
-        users[existingIdx] = { ...users[existingIdx], ...userObj };
+        users[existingIdx] = { ...users[existingIdx], ...normalizedUser };
       } else {
-        users.unshift({
-          id: userObj.id || 'usr_' + Date.now(),
-          createdAt: new Date().toISOString(),
-          status: 'Activo',
-          gamesScored: 0,
-          inningsLogged: 0,
-          playsProcessed: 0,
-          ...userObj
-        });
+        users.unshift(normalizedUser);
       }
       localStorage.setItem(STORAGE_KEYS.USERS_LIST, JSON.stringify(users));
       
-      // Sincronizar con Supabase si está conectado
+      // Sincronizar en la nube Supabase si está disponible
       if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
-        const u = existingIdx >= 0 ? users[existingIdx] : users[0];
-        SupabaseService.syncProfile(u, { gamesScored: u.gamesScored, inningsLogged: u.inningsLogged, playsProcessed: u.playsProcessed });
+        try {
+          await SupabaseService.syncProfile(normalizedUser, {
+            gamesScored: normalizedUser.gamesScored,
+            inningsLogged: normalizedUser.inningsLogged,
+            playsProcessed: normalizedUser.playsProcessed
+          });
+        } catch (syncErr) {
+          console.warn('Nota: Sincronización en la nube en segundo plano:', syncErr);
+        }
       }
 
       return true;
@@ -109,21 +150,42 @@ const StorageService = {
     }
   },
 
-  authenticateUser(emailOrUser, password) {
-    const users = this.getUsersList();
+  async authenticateUser(emailOrUser, password) {
     const cleanInput = (emailOrUser || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    // 1. Verificación local en LocalStorage
+    const users = this.getUsersList();
     const found = users.find(u => {
-      const emailMatch = u.email && u.email.toLowerCase() === cleanInput;
-      const nameMatch = u.name && u.name.toLowerCase() === cleanInput;
-      const userPartMatch = u.email && u.email.split('@')[0].toLowerCase() === cleanInput;
-      return (emailMatch || nameMatch || userPartMatch) &&
-             u.password === password &&
-             u.status !== 'Inactivo';
+      const uEmail = (u.email || '').trim().toLowerCase();
+      const uName = (u.name || '').trim().toLowerCase();
+      const uUserPart = uEmail.split('@')[0];
+      const uPass = (u.password || '').trim();
+
+      const identityMatch = (uEmail === cleanInput || uName === cleanInput || uUserPart === cleanInput);
+      const passMatch = (uPass === cleanPass);
+      return identityMatch && passMatch && u.status !== 'Inactivo';
     });
+
     if (found) {
       this.setUser(found);
       return found;
     }
+
+    // 2. Verificación en la base de datos Supabase Cloud (si no se halló en este dispositivo)
+    if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+      try {
+        const cloudUser = await SupabaseService.authenticateCloud(cleanInput, cleanPass);
+        if (cloudUser) {
+          await this.saveUser(cloudUser);
+          this.setUser(cloudUser);
+          return cloudUser;
+        }
+      } catch (err) {
+        console.warn('Fallo comprobación en nube Supabase:', err);
+      }
+    }
+
     return null;
   },
 

@@ -197,32 +197,136 @@ const SupabaseService = {
   },
 
   /**
-   * Sync Scorer Profile & Metrics
+   * Sync Scorer Profile, Password & Metrics
    */
-  async syncProfile(user, metrics) {
+  async syncProfile(user, metrics = {}) {
     if (!this.isConfigured() || !this.client) return false;
 
     try {
       const payload = {
-        id: user.id || 'usr-official-01',
+        id: user.id || 'usr_' + Date.now(),
         name: user.name,
-        email: user.email,
-        license: user.license,
-        role: user.role,
-        games_scored: metrics.gamesScored || 0,
-        innings_logged: metrics.inningsLogged || 0,
-        plays_processed: metrics.playsProcessed || 0,
+        email: (user.email || '').trim().toLowerCase(),
+        password: (user.password || '').trim(),
+        license: user.license || 'Licencia Registrada',
+        role: user.role || 'Anotador Oficial',
+        status: user.status || 'Activo',
+        games_scored: (metrics && metrics.gamesScored) || user.gamesScored || 0,
+        innings_logged: (metrics && metrics.inningsLogged) || user.inningsLogged || 0,
+        plays_processed: (metrics && metrics.playsProcessed) || user.playsProcessed || 0,
         updated_at: new Date().toISOString()
       };
 
-      await this.client
+      const { error } = await this.client
         .from('scorer_profiles')
         .upsert(payload, { onConflict: 'id' });
 
+      if (error) {
+        console.warn('Nota Supabase syncProfile:', error.message);
+        return false;
+      }
       return true;
     } catch (e) {
       console.warn('Error sincronizando perfil en Supabase:', e);
       return false;
+    }
+  },
+
+  /**
+   * Fetch all registered scorers from Supabase
+   */
+  async fetchCloudUsers() {
+    if (!this.isConfigured() || !this.client) return null;
+
+    try {
+      const { data, error } = await this.client
+        .from('scorer_profiles')
+        .select('*');
+
+      if (error || !data || data.length === 0) return null;
+
+      return data.map(item => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        password: item.password || 'anotador2026',
+        license: item.license || 'Licencia Oficial',
+        role: item.role || 'Anotador Oficial',
+        status: item.status || 'Activo',
+        gamesScored: item.games_scored || 0,
+        inningsLogged: item.innings_logged || 0,
+        playsProcessed: item.plays_processed || 0,
+        createdAt: item.updated_at
+      }));
+    } catch (e) {
+      return null;
+    }
+  },
+
+  /**
+   * Authenticate user against Supabase Cloud (Table or Auth)
+   */
+  async authenticateCloud(identity, password) {
+    if (!this.isConfigured() || !this.client) return null;
+
+    try {
+      // 1. Verificar en tabla scorer_profiles
+      const { data, error } = await this.client
+        .from('scorer_profiles')
+        .select('*')
+        .or(`email.ilike.${identity},name.ilike.${identity}`);
+
+      if (!error && data && data.length > 0) {
+        const found = data.find(u => {
+          const passMatch = (u.password || '').trim() === (password || '').trim();
+          return passMatch && u.status !== 'Inactivo';
+        });
+
+        if (found) {
+          return {
+            id: found.id,
+            name: found.name,
+            email: found.email,
+            password: found.password,
+            license: found.license,
+            role: found.role,
+            status: found.status,
+            gamesScored: found.games_scored || 0,
+            inningsLogged: found.innings_logged || 0,
+            playsProcessed: found.plays_processed || 0
+          };
+        }
+      }
+
+      // 2. Intentar autenticación vía Supabase Auth
+      try {
+        const { data: authData, error: authErr } = await this.client.auth.signInWithPassword({
+          email: identity,
+          password: password
+        });
+
+        if (!authErr && authData && authData.user) {
+          return {
+            id: authData.user.id,
+            name: authData.user.user_metadata?.name || identity.split('@')[0],
+            email: authData.user.email,
+            password: password,
+            license: 'Anotador Verificado Supabase',
+            role: 'Anotador Oficial',
+            status: 'Activo',
+            gamesScored: 0,
+            inningsLogged: 0,
+            playsProcessed: 0
+          };
+        }
+      } catch (authE) {
+        // Continuar
+      }
+
+      return null;
+    } catch (e) {
+      console.warn('Excepción autenticando en nube:', e);
+      return null;
     }
   }
 };

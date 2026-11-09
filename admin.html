@@ -358,12 +358,26 @@
       document.getElementById('adminDashboardView').style.display = 'none';
     }
 
-    function showDashboard() {
+    async function showDashboard() {
       document.getElementById('adminGateScreen').style.display = 'none';
       document.getElementById('adminDashboardView').style.display = 'flex';
       renderAdminKPIs();
       renderScorersTable();
       renderGlobalGamesTable();
+
+      // Sincronizar anotadores desde la nube si Supabase está activo
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          const cloudUsers = await SupabaseService.fetchCloudUsers();
+          if (cloudUsers && cloudUsers.length > 0) {
+            cloudUsers.forEach(cu => StorageService.saveUser(cu));
+            renderScorersTable();
+            renderAdminKPIs();
+          }
+        } catch (e) {
+          console.warn('Sincronización inicial de nube:', e);
+        }
+      }
     }
 
     function attachAdminEvents() {
@@ -389,7 +403,7 @@
       });
 
       // Create Scorer Form
-      document.getElementById('createScorerForm').addEventListener('submit', (e) => {
+      document.getElementById('createScorerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('newScorerName').value.trim();
         const email = document.getElementById('newScorerEmail').value.trim();
@@ -416,7 +430,7 @@
           playsProcessed: 0
         };
 
-        StorageService.saveUser(newUser);
+        await StorageService.saveUser(newUser);
 
         // Reset form
         document.getElementById('newScorerName').value = '';
@@ -425,7 +439,7 @@
 
         renderScorersTable();
         renderAdminKPIs();
-        showToast(`Anotador ${name} creado con éxito. Ya puede ingresar en el home.`);
+        showToast(`Anotador ${name} registrado con éxito. Ya puede ingresar en el home.`);
       });
     }
 

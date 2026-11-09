@@ -39,18 +39,24 @@ CREATE TABLE IF NOT EXISTS public.checkpoints (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3. Tabla de Perfiles y Métricas de Anotadores
+-- 3. Tabla de Perfiles, Credenciales y Métricas de Anotadores
 CREATE TABLE IF NOT EXISTS public.scorer_profiles (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  email TEXT,
+  email TEXT UNIQUE,
+  password TEXT,
   license TEXT,
   role TEXT DEFAULT 'Anotador Oficial',
+  status TEXT DEFAULT 'Activo',
   games_scored INT DEFAULT 0,
   innings_logged INT DEFAULT 0,
   plays_processed INT DEFAULT 0,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Si la tabla ya existía, asegurarse de que tenga las columnas password y status
+ALTER TABLE public.scorer_profiles ADD COLUMN IF NOT EXISTS password TEXT;
+ALTER TABLE public.scorer_profiles ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Activo';
 
 -- =============================================================================
 -- POLÍTICAS DE SEGURIDAD (Row Level Security - RLS)
@@ -85,3 +91,18 @@ CREATE POLICY "Permitir gestión de perfiles"
 -- Índices de alto rendimiento
 CREATE INDEX IF NOT EXISTS idx_games_updated_at ON public.games(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_checkpoints_game_id ON public.checkpoints(game_id);
+CREATE INDEX IF NOT EXISTS idx_scorer_email ON public.scorer_profiles(email);
+
+-- =============================================================================
+-- USUARIOS INICIALES (SEMILLA)
+-- =============================================================================
+INSERT INTO public.scorer_profiles (id, name, email, password, license, role, status, games_scored, innings_logged, plays_processed)
+VALUES 
+  ('usr-admin-henry', 'Henry Macho', 'henrymacho87@gmail.com', 'anotador2026', 'Certificado Máster Sport Click #001', 'Anotador Oficial y Administrador', 'Activo', 30, 270, 1850),
+  ('usr-official-01', 'Lic. Carlos Mendoza', 'carlos.mendoza@wbsc.org', 'demo', 'WBSC Nivel II / Cert. FVB-2024-89', 'Anotador Oficial Internacional', 'Activo', 24, 208, 1420),
+  ('usr-official-02', 'Roberto Alomar', 'anotador@sportclick.com', 'demo', 'Certificado Nacional LVBP #104', 'Anotador Titular', 'Activo', 12, 98, 615)
+ON CONFLICT (id) DO UPDATE SET
+  password = EXCLUDED.password,
+  status = EXCLUDED.status,
+  name = EXCLUDED.name;
+
