@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Archivos de entorno y credenciales
+.env
+.env.local
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs y temporales
+*.log
+tmp/
+.cache/

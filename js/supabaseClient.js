@@ -8,13 +8,19 @@ const SUPABASE_STORAGE_KEYS = {
   ANON_KEY: 'scs_supabase_anon_key'
 };
 
+// Default preconfigured project credentials
+const DEFAULT_SUPABASE_CONFIG = {
+  url: 'https://tvdrmjndvevsfvtbtvtj.supabase.co',
+  anonKey: 'sb_publishable_2pbr7J8Vuk0qXwXA2s9PmQ_e6lE7Hwt'
+};
+
 const SupabaseService = {
   client: null,
 
   getConfig() {
     return {
-      url: localStorage.getItem(SUPABASE_STORAGE_KEYS.URL) || '',
-      anonKey: localStorage.getItem(SUPABASE_STORAGE_KEYS.ANON_KEY) || ''
+      url: localStorage.getItem(SUPABASE_STORAGE_KEYS.URL) || DEFAULT_SUPABASE_CONFIG.url,
+      anonKey: localStorage.getItem(SUPABASE_STORAGE_KEYS.ANON_KEY) || DEFAULT_SUPABASE_CONFIG.anonKey
     };
   },
 
