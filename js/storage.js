@@ -6,6 +6,7 @@
 const STORAGE_KEYS = {
   USER_SESSION: 'scs_user_session',
   USERS_LIST: 'scs_users_database',
+  DELETED_USERS: 'scs_deleted_users_set',
   ADMIN_SESSION: 'scs_admin_session',
   SCORER_METRICS: 'scs_scorer_metrics',
   GAMES_HISTORY: 'scs_games_history',
@@ -65,25 +66,59 @@ const DEFAULT_METRICS = {
 };
 
 const StorageService = {
+  // --- Control de Anotadores Eliminados Permanentemente ---
+  getDeletedUserIds() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.DELETED_USERS);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  markUserAsDeleted(id, email) {
+    try {
+      const deleted = this.getDeletedUserIds();
+      if (id && !deleted.includes(id)) deleted.push(id);
+      if (email && !deleted.includes(email.toLowerCase().trim())) deleted.push(email.toLowerCase().trim());
+      localStorage.setItem(STORAGE_KEYS.DELETED_USERS, JSON.stringify(deleted));
+    } catch (e) {}
+  },
+
   // --- Registered Users Database (Managed by Admin & Cloud) ---
   getUsersList() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.USERS_LIST);
+      const deletedIds = this.getDeletedUserIds();
       let list = data ? JSON.parse(data) : [];
+
       if (!Array.isArray(list) || list.length === 0) {
-        list = [...DEFAULT_USERS_DATABASE];
+        list = DEFAULT_USERS_DATABASE.filter(u => 
+          !deletedIds.includes(u.id) && !deletedIds.includes((u.email || '').toLowerCase().trim())
+        );
       } else {
-        // Garantizar que usuarios por defecto (incluyendo Henry Macho) siempre estén registrados
+        // Garantizar que usuarios por defecto siempre estén si no fueron eliminados
         DEFAULT_USERS_DATABASE.forEach(defUser => {
-          const exists = list.some(u => 
-            (u.email && u.email.toLowerCase() === defUser.email.toLowerCase()) ||
-            u.id === defUser.id
-          );
-          if (!exists) {
-            list.push(defUser);
+          const userEmail = (defUser.email || '').toLowerCase().trim();
+          const isDeleted = deletedIds.includes(defUser.id) || deletedIds.includes(userEmail);
+          if (!isDeleted) {
+            const exists = list.some(u => 
+              (u.email && u.email.toLowerCase().trim() === userEmail) ||
+              u.id === defUser.id
+            );
+            if (!exists) {
+              list.push(defUser);
+            }
           }
         });
+
+        // Filtrar permanentemente cualquier usuario marcado como eliminado
+        list = list.filter(u => {
+          const email = (u.email || '').toLowerCase().trim();
+          return !deletedIds.includes(u.id) && !deletedIds.includes(email);
+        });
       }
+
       localStorage.setItem(STORAGE_KEYS.USERS_LIST, JSON.stringify(list));
       return list;
     } catch (e) {
@@ -97,8 +132,16 @@ const StorageService = {
       const cleanEmail = (userObj.email || '').trim().toLowerCase();
       const existingIdx = users.findIndex(u => 
         (u.id && u.id === userObj.id) || 
-        (u.email && u.email.toLowerCase() === cleanEmail)
+        (u.email && u.email.toLowerCase().trim() === cleanEmail)
       );
+
+      // Si el usuario estaba en la lista de eliminados y se vuelve a guardar/crear, rehabilitarlo
+      try {
+        const deleted = this.getDeletedUserIds().filter(d => 
+          d !== userObj.id && d !== cleanEmail
+        );
+        localStorage.setItem(STORAGE_KEYS.DELETED_USERS, JSON.stringify(deleted));
+      } catch (e) {}
 
       const normalizedUser = {
         id: userObj.id || 'usr_' + Date.now(),
@@ -139,13 +182,37 @@ const StorageService = {
     }
   },
 
-  deleteUser(userId) {
+  async deleteUser(userId) {
     try {
       let users = this.getUsersList();
-      users = users.filter(u => u.id !== userId);
+      const userToDelete = users.find(u => u.id === userId);
+      const userEmail = userToDelete ? (userToDelete.email || '').toLowerCase().trim() : null;
+
+      // Registrar en lista de eliminados permanentes
+      this.markUserAsDeleted(userId, userEmail);
+
+      // Remover de lista local
+      users = users.filter(u => u.id !== userId && (userEmail ? (u.email || '').toLowerCase().trim() !== userEmail : true));
       localStorage.setItem(STORAGE_KEYS.USERS_LIST, JSON.stringify(users));
+
+      // Si el usuario eliminado era la sesión activa en este navegador, cerrarla
+      const currentActive = this.getUser();
+      if (currentActive && (currentActive.id === userId || (userEmail && (currentActive.email || '').toLowerCase().trim() === userEmail))) {
+        this.logoutUser();
+      }
+
+      // Eliminar de la base de datos en la nube (Supabase)
+      if (typeof SupabaseService !== 'undefined' && SupabaseService.isConfigured()) {
+        try {
+          await SupabaseService.deleteCloudScorer(userId, userEmail);
+        } catch (cloudErr) {
+          console.warn('Nota: Eliminación en la nube:', cloudErr);
+        }
+      }
+
       return true;
     } catch (e) {
+      console.error('Error eliminando usuario:', e);
       return false;
     }
   },

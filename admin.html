@@ -330,6 +330,77 @@
 
   </div>
 
+  <!-- Modal: Editar Anotador -->
+  <div id="editScorerModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>✏️</span>
+          <span>Editar Perfil de Anotador</span>
+        </h3>
+        <button type="button" class="btn-icon" onclick="closeEditScorerModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:1.25rem;">
+        <form id="editScorerForm" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <input type="hidden" id="editScorerId">
+
+          <div class="form-group">
+            <label class="form-label" for="editScorerName">Nombre Completo</label>
+            <input type="text" id="editScorerName" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editScorerEmail">Correo / Usuario de Acceso</label>
+            <input type="email" id="editScorerEmail" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editScorerPassword">Contraseña de Acceso</label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <input type="password" id="editScorerPassword" class="form-input" required style="padding-right:2.5rem; width:100%;">
+              <button type="button" id="editTogglePassBtn" style="position:absolute; right:0.6rem; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem; padding:0.2rem;" title="Mostrar / ocultar contraseña">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editScorerLicense">Licencia / Credencial</label>
+            <input type="text" id="editScorerLicense" class="form-input" required>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div class="form-group">
+              <label class="form-label" for="editScorerRole">Rol</label>
+              <select id="editScorerRole" class="form-input" style="cursor:pointer;">
+                <option value="Anotador Oficial">Anotador Oficial</option>
+                <option value="Anotador Titular">Anotador Titular</option>
+                <option value="Anotador en Prácticas">Anotador en Prácticas</option>
+                <option value="Comisario Técnico">Comisario Técnico</option>
+                <option value="Anotador Oficial y Administrador">Anotador Oficial y Administrador</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="editScorerStatus">Estado</label>
+              <select id="editScorerStatus" class="form-input" style="cursor:pointer;">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+            <button type="button" class="btn-nav" onclick="closeEditScorerModal()">Cancelar</button>
+            <button type="submit" id="btnEditScorerSubmit" class="btn-nav btn-primary">
+              💾 Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -402,11 +473,22 @@
         showToast('Sesión de administrador cerrada');
       });
 
+      // Toggle contraseña en modal de edición
+      const editTogglePassBtn = document.getElementById('editTogglePassBtn');
+      if (editTogglePassBtn) {
+        editTogglePassBtn.addEventListener('click', () => {
+          const passInput = document.getElementById('editScorerPassword');
+          const isPass = passInput.type === 'password';
+          passInput.type = isPass ? 'text' : 'password';
+          editTogglePassBtn.textContent = isPass ? '🔒' : '👁️';
+        });
+      }
+
       // Create Scorer Form
       document.getElementById('createScorerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('newScorerName').value.trim();
-        const email = document.getElementById('newScorerEmail').value.trim();
+        const email = document.getElementById('newScorerEmail').value.trim().toLowerCase();
         const password = document.getElementById('newScorerPassword').value.trim();
         const license = document.getElementById('newScorerLicense').value.trim();
         const role = document.getElementById('newScorerRole').value;
@@ -416,13 +498,27 @@
           return;
         }
 
+        // Verificar si ya existe un usuario con este correo
+        const existingUsers = StorageService.getUsersList();
+        const exists = existingUsers.some(u => (u.email || '').toLowerCase().trim() === email);
+        if (exists) {
+          if (!confirm(`Ya existe un anotador registrado con el correo ${email}. ¿Deseas sobreescribir sus datos?`)) {
+            return;
+          }
+        }
+
+        const btnSubmit = document.getElementById('createScorerForm').querySelector('button[type="submit"]');
+        const origText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = '<span>⏳</span><span>Registrando...</span>';
+        btnSubmit.disabled = true;
+
         const newUser = {
           id: 'usr_' + Date.now(),
           name,
           email,
           password,
-          license,
-          role,
+          license: license || 'WBSC Nivel II',
+          role: role || 'Anotador Oficial',
           status: 'Activo',
           createdAt: new Date().toISOString(),
           gamesScored: 0,
@@ -430,17 +526,80 @@
           playsProcessed: 0
         };
 
-        await StorageService.saveUser(newUser);
+        try {
+          await StorageService.saveUser(newUser);
 
-        // Reset form
-        document.getElementById('newScorerName').value = '';
-        document.getElementById('newScorerEmail').value = '';
-        document.getElementById('newScorerPassword').value = 'anotador2026';
+          // Limpiar formulario
+          document.getElementById('newScorerName').value = '';
+          document.getElementById('newScorerEmail').value = '';
+          document.getElementById('newScorerPassword').value = 'anotador2026';
+          document.getElementById('newScorerLicense').value = 'WBSC Nivel II';
 
-        renderScorersTable();
-        renderAdminKPIs();
-        showToast(`Anotador ${name} registrado con éxito. Ya puede ingresar en el home.`);
+          renderScorersTable();
+          renderAdminKPIs();
+          showToast(`Anotador ${name} registrado con éxito. Ya puede ingresar en el home.`);
+        } catch (err) {
+          console.error(err);
+          showToast('Error al registrar anotador');
+        } finally {
+          btnSubmit.innerHTML = origText;
+          btnSubmit.disabled = false;
+        }
       });
+
+      // Edit Scorer Form Submit
+      const editScorerForm = document.getElementById('editScorerForm');
+      if (editScorerForm) {
+        editScorerForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const id = document.getElementById('editScorerId').value;
+          const name = document.getElementById('editScorerName').value.trim();
+          const email = document.getElementById('editScorerEmail').value.trim().toLowerCase();
+          const password = document.getElementById('editScorerPassword').value.trim();
+          const license = document.getElementById('editScorerLicense').value.trim();
+          const role = document.getElementById('editScorerRole').value;
+          const status = document.getElementById('editScorerStatus').value;
+
+          if (!name || !email || !password) {
+            showToast('Nombre, email y contraseña son obligatorios');
+            return;
+          }
+
+          const btnSubmit = document.getElementById('btnEditScorerSubmit');
+          const origText = btnSubmit.innerHTML;
+          btnSubmit.innerHTML = '<span>⏳</span><span>Guardando...</span>';
+          btnSubmit.disabled = true;
+
+          try {
+            const users = StorageService.getUsersList();
+            const existing = users.find(u => u.id === id) || {};
+
+            const updatedUser = {
+              ...existing,
+              id,
+              name,
+              email,
+              password,
+              license: license || 'Licencia Registrada',
+              role,
+              status,
+              updatedAt: new Date().toISOString()
+            };
+
+            await StorageService.saveUser(updatedUser);
+            closeEditScorerModal();
+            renderScorersTable();
+            renderAdminKPIs();
+            showToast(`Anotador ${name} actualizado con éxito.`);
+          } catch (err) {
+            console.error(err);
+            showToast('Error al actualizar anotador');
+          } finally {
+            btnSubmit.innerHTML = origText;
+            btnSubmit.disabled = false;
+          }
+        });
+      }
     }
 
     function renderAdminKPIs() {
@@ -491,11 +650,14 @@
           </td>
           <td style="text-align:center;">
             <div style="display:flex; justify-content:center; gap:0.3rem;">
-              <button class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="toggleScorerStatus('${u.id}')" title="Alternar Activo/Inactivo">
+              <button type="button" class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem; border-color:var(--cyan); color:var(--cyan);" onclick="openEditScorerModal('${u.id}')" title="Editar anotador y credenciales">
+                ✏️ Editar
+              </button>
+              <button type="button" class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="toggleScorerStatus('${u.id}')" title="Alternar Activo/Inactivo">
                 ${u.status === 'Inactivo' ? 'Activar' : 'Pausar'}
               </button>
-              <button class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem; border-color:var(--crimson); color:var(--crimson);" onclick="deleteScorerEntry('${u.id}')" title="Eliminar anotador">
-                🗑️
+              <button type="button" class="btn-nav" style="padding:0.25rem 0.5rem; font-size:0.75rem; border-color:var(--crimson); color:var(--crimson);" onclick="deleteScorerEntry('${u.id}')" title="Eliminar anotador">
+                🗑️ Eliminar
               </button>
             </div>
           </td>
@@ -544,6 +706,33 @@
       `).join('');
     }
 
+    window.openEditScorerModal = function(userId) {
+      const users = StorageService.getUsersList();
+      const user = users.find(u => u.id === userId);
+      if (!user) return;
+
+      document.getElementById('editScorerId').value = user.id;
+      document.getElementById('editScorerName').value = user.name || '';
+      document.getElementById('editScorerEmail').value = user.email || '';
+      document.getElementById('editScorerPassword').value = user.password || '';
+      document.getElementById('editScorerLicense').value = user.license || '';
+      document.getElementById('editScorerRole').value = user.role || 'Anotador Oficial';
+      document.getElementById('editScorerStatus').value = user.status || 'Activo';
+
+      const passInput = document.getElementById('editScorerPassword');
+      if (passInput) passInput.type = 'password';
+      const toggleBtn = document.getElementById('editTogglePassBtn');
+      if (toggleBtn) toggleBtn.textContent = '👁️';
+
+      const modal = document.getElementById('editScorerModal');
+      if (modal) modal.classList.add('open');
+    };
+
+    window.closeEditScorerModal = function() {
+      const modal = document.getElementById('editScorerModal');
+      if (modal) modal.classList.remove('open');
+    };
+
     window.togglePasswordVisibility = function(userId, realPassword) {
       const span = document.getElementById(`passSpan_${userId}`);
       if (span.textContent === '••••••••') {
@@ -557,23 +746,27 @@
       }
     };
 
-    window.toggleScorerStatus = function(userId) {
+    window.toggleScorerStatus = async function(userId) {
       const users = StorageService.getUsersList();
       const user = users.find(u => u.id === userId);
       if (user) {
         user.status = user.status === 'Inactivo' ? 'Activo' : 'Inactivo';
-        StorageService.saveUser(user);
+        await StorageService.saveUser(user);
         renderScorersTable();
         showToast(`Estado de ${user.name} actualizado a ${user.status}`);
       }
     };
 
-    window.deleteScorerEntry = function(userId) {
-      if (confirm('¿Estás seguro de que deseas eliminar este anotador? Perderá acceso a la plataforma.')) {
-        StorageService.deleteUser(userId);
+    window.deleteScorerEntry = async function(userId) {
+      const users = StorageService.getUsersList();
+      const user = users.find(u => u.id === userId);
+      const name = user ? user.name : 'este anotador';
+
+      if (confirm(`¿Estás seguro de que deseas eliminar permanentemente a "${name}"? Perderá acceso inmediato a la plataforma.`)) {
+        await StorageService.deleteUser(userId);
         renderScorersTable();
         renderAdminKPIs();
-        showToast('Anotador eliminado');
+        showToast(`Anotador "${name}" eliminado correctamente.`);
       }
     };
 

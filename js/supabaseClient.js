@@ -197,6 +197,32 @@ const SupabaseService = {
   },
 
   /**
+   * Delete registered scorer in cloud
+   */
+  async deleteCloudScorer(userId, userEmail) {
+    if (!this.isConfigured() || !this.client) return false;
+
+    try {
+      if (userId) {
+        await this.client
+          .from('scorer_profiles')
+          .delete()
+          .eq('id', userId);
+      }
+      if (userEmail) {
+        await this.client
+          .from('scorer_profiles')
+          .delete()
+          .eq('email', userEmail.toLowerCase().trim());
+      }
+      return true;
+    } catch (e) {
+      console.warn('Error eliminando anotador en Supabase:', e);
+      return false;
+    }
+  },
+
+  /**
    * Sync Scorer Profile, Password & Metrics
    */
   async syncProfile(user, metrics = {}) {
