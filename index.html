@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sport Click Stats | Sistema Profesional de Anotación de Béisbol</title>
+  <meta name="description" content="Plataforma profesional de anotación de béisbol y sóftbol en tiempo real con estadísticas avanzadas de lanzadores, receptores y bateadores.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚾</text></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Print Only Header for PDF Generation -->
+  <div class="print-only-header">
+    <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.2rem;">SPORT CLICK STATS</h1>
+    <h3 style="font-size: 1.1rem; font-weight: 600; color: #444;">HOJA OFICIAL DE ANOTACIÓN Y BOX SCORE DE BÉISBOL</h3>
+    <p style="font-size: 0.85rem; color: #666; margin-top: 0.2rem;">Reglamento Oficial WBSC / Confederación Panamericana</p>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar">
+    <div class="brand-wrapper">
+      <div class="brand-icon">⚾</div>
+      <div class="brand-text">
+        <h1>Sport Click Stats</h1>
+        <div class="brand-tag">app de anotación</div>
+      </div>
+    </div>
+
+    <!-- Center Dual Scoring Switcher -->
+    <div class="mode-toggle-group">
+      <button id="modeFastBtn" class="mode-btn active" title="Modo Turno por Turno Rápido">
+        <span class="mode-dot"></span>
+        <span>⚡ Modo Rápido</span>
+      </button>
+      <button id="modeDetailedBtn" class="mode-btn" title="Modo Pitcheo por Pitcheo (Pintada)">
+        <span class="mode-dot"></span>
+        <span>🎯 Modo Detallado</span>
+      </button>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="nav-actions">
+      <button id="newGameBtn" class="btn-nav btn-primary" title="Crear un nuevo partido desde cero">
+        <span>➕</span>
+        <span>Nuevo Partido</span>
+      </button>
+
+      <button id="editLineupBtn" class="btn-nav" title="Configurar rosters, alineaciones y baterías">
+        <span>👥</span>
+        <span>Rosters / Lineup</span>
+      </button>
+
+      <button id="importLeagueBtn" class="btn-nav" title="Importar datos de torneo o liga">
+        <span>📥</span>
+        <span>Importar Liga</span>
+      </button>
+
+      <button id="supabaseConfigBtn" class="btn-nav" title="Conectar base de datos en la nube (Supabase)">
+        <span id="cloudStatusIcon">☁️</span>
+        <span>Supabase</span>
+      </button>
+
+      <button id="saveGameBtn" class="btn-nav" title="Guardar partido en base de datos local">
+        <span>💾</span>
+        <span>Guardar</span>
+      </button>
+
+      <button id="historyBtn" class="btn-nav" title="Ver partidos previos">
+        <span>📋</span>
+        <span>Historial</span>
+      </button>
+
+      <button id="exportModalBtn" class="btn-nav" title="Exportar reporte o imprimir">
+        <span>📊</span>
+        <span>Exportar Box Score</span>
+      </button>
+
+      <button id="themeToggleBtn" class="btn-icon" title="Cambiar tema Claro / Oscuro">
+        <span id="themeIcon">🌙</span>
+      </button>
+
+      <div id="userBadgeBtn" class="user-badge" title="Ver perfil de anotador">
+        <div id="userAvatarSm" class="user-avatar-sm">CM</div>
+        <span id="userNameSm" class="user-name-sm">Lic. Mendoza</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+
+    <!-- Scoreboard Hero Banner -->
+    <section class="scoreboard-banner">
+      <div class="scoreboard-grid">
+        
+        <!-- Visitor Team -->
+        <div class="team-box visitor-box">
+          <div id="visitorLogo" class="team-logo-badge" style="background:#0A2540; border-color:#F59E0B;">⚓</div>
+          <div class="team-details">
+            <div id="visitorCity" class="team-city">Navegantes del</div>
+            <div id="visitorName" class="team-name">Magallanes</div>
+          </div>
+          <div id="visitorScore" class="team-score-num">0</div>
+        </div>
+
+        <!-- Center Inning, Balls, Strikes, Outs -->
+        <div class="game-center-meta">
+          <div class="inning-display-badge">
+            <span id="inningArrow" class="inning-arrow">▲ Alta</span>
+            <span id="inningText">1ra Entrada</span>
+          </div>
+
+          <div class="count-indicators">
+            <div class="count-item">
+              <span class="label">B</span>
+              <div id="ballDots" class="count-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+            <div class="count-item">
+              <span class="label">S</span>
+              <div id="strikeDots" class="count-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+            <div class="count-item">
+              <span class="label">O</span>
+              <div id="outDots" class="count-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Home Team -->
+        <div class="team-box home-box">
+          <div id="homeLogo" class="team-logo-badge" style="background:#EAB308; border-color:#000000; color:#000;">🦁</div>
+          <div class="team-details">
+            <div id="homeCity" class="team-city">Leones del</div>
+            <div id="homeName" class="team-name">Caracas</div>
+          </div>
+          <div id="homeScore" class="team-score-num">0</div>
+        </div>
+      </div>
+
+      <!-- Live Matchup Status Bar -->
+      <div class="current-matchup-bar">
+        <div class="matchup-item">
+          <span class="highlight-role">Al Bate:</span>
+          <span id="currentBatterName">Cargando bateador...</span>
+        </div>
+        <div class="matchup-item">
+          <span class="highlight-role">Lanzador:</span>
+          <span id="currentPitcherName">Cargando lanzador...</span>
+          <span id="currentPitchCount" class="card-pill">0 pitcheos</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bento Grid (Scoring Workspace) -->
+    <div class="bento-grid">
+
+      <!-- Bento Col 1: Baseball Diamond & Runners -->
+      <div class="bento-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">💎</span>
+            <span>Diamante y Almohadillas</span>
+          </h2>
+          <span class="card-pill">En Vivo</span>
+        </div>
+
+        <div class="diamond-container">
+          <div class="diamond-svg-wrap">
+            <svg viewBox="0 0 400 400">
+              <!-- Field Infield Dirt Arc -->
+              <path d="M 60,200 A 140,140 0 0,1 340,200 L 200,340 Z" fill="var(--field-dirt)" />
+              
+              <!-- Infield Grass Diamond -->
+              <polygon points="200,100 300,200 200,300 100,200" fill="var(--field-grass)" />
+              
+              <!-- Baseline Tracks -->
+              <line x1="200" y1="340" x2="310" y2="200" stroke="var(--field-line)" stroke-width="3" />
+              <line x1="310" y1="200" x2="200" y2="90" stroke="var(--field-line)" stroke-width="3" />
+              <line x1="200" y1="90" x2="90" y2="200" stroke="var(--field-line)" stroke-width="3" />
+              <line x1="90" y1="200" x2="200" y2="340" stroke="var(--field-line)" stroke-width="3" />
+
+              <!-- Pitcher's Mound -->
+              <circle cx="200" cy="200" r="18" fill="var(--field-dirt)" stroke="#475569" stroke-width="2" />
+              <rect x="193" y="197" width="14" height="6" fill="#FFFFFF" />
+
+              <!-- Home Plate -->
+              <polygon points="200,346 212,334 212,326 188,326 188,334" class="base-cushion home-plate" />
+
+              <!-- First Base (1B) Cushion -->
+              <rect id="base-1" x="300" y="190" width="22" height="22" rx="4" transform="rotate(45 311 201)" class="base-cushion" />
+              
+              <!-- Second Base (2B) Cushion -->
+              <rect id="base-2" x="189" y="79" width="22" height="22" rx="4" transform="rotate(45 200 90)" class="base-cushion" />
+
+              <!-- Third Base (3B) Cushion -->
+              <rect id="base-3" x="78" y="190" width="22" height="22" rx="4" transform="rotate(45 89 201)" class="base-cushion" />
+            </svg>
+          </div>
+
+          <!-- Live Base Runners Status List -->
+          <div id="runnersList" class="runners-status-list">
+            <!-- Populated via JavaScript -->
+          </div>
+
+          <!-- Base Quick Contextual Buttons -->
+          <div class="base-actions-grid">
+            <button class="btn-base-action" data-base-action="SB" title="Robo de base (+SB)">🏃 +SB (Robo)</button>
+            <button class="btn-base-action" data-base-action="CS" title="Atrapado robando (+CS)">🧤 +CS (Out Robo)</button>
+            <button class="btn-base-action" data-base-action="PB" title="Pasbol (+PB)">⚠️ +PB (Pasbol)</button>
+            <button class="btn-base-action" data-base-action="WP" title="Wild Pitch (+WP)">💨 +WP (Wild Pitch)</button>
+            <button class="btn-base-action" data-base-action="PICKOFF" title="Viraje y out a base">🎯 +Pickoff</button>
+            <button class="btn-base-action" onclick="appState.bases={first:null,second:null,third:null};renderAll();" title="Limpiar bases">🧹 Limpiar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bento Col 2: Dual Scoring Engine (Fast vs Detailed) -->
+      <div class="bento-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">🎮</span>
+            <span>Mesa de Anotación</span>
+          </h2>
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <button id="openSubModalBtn" class="btn-nav" style="padding:0.25rem 0.6rem; font-size:0.75rem; border-color:var(--violet); color:var(--violet);" title="Realizar sustitución (Emergente / Relevista / Defensivo)">
+              <span>🔄</span>
+              <span>Sustitución</span>
+            </button>
+            <button id="quickCheckpointBtn" class="btn-nav" style="padding:0.25rem 0.6rem; font-size:0.75rem; border-color:var(--emerald); color:var(--emerald);" title="Guardar Checkpoint rápido en este momento del juego">
+              <span>📍</span>
+              <span>Guardar Checkpoint</span>
+            </button>
+            <button id="checkpointsListBtn" class="btn-icon" style="width:30px; height:30px; font-size:0.8rem;" title="Ver y restaurar checkpoints">
+              <span>🗂️</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="scoring-engine-wrap">
+          
+          <!-- ==================== MODO RÁPIDO ==================== -->
+          <div id="fastModeSection" class="fast-mode-panel">
+            
+            <!-- Hits Group -->
+            <div>
+              <div class="scoring-group-label" style="color:var(--emerald);">
+                <span>🟢</span>
+                <span>Conexiones de Hit</span>
+              </div>
+              <div class="scoring-btn-grid" style="margin-top: 0.35rem;">
+                <button class="score-action-btn btn-hit" data-hit="1B" title="Sencillo">
+                  <span class="btn-code">1B</span>
+                  <span class="btn-desc">Sencillo</span>
+                </button>
+                <button class="score-action-btn btn-hit" data-hit="2B" title="Doble">
+                  <span class="btn-code">2B</span>
+                  <span class="btn-desc">Doble</span>
+                </button>
+                <button class="score-action-btn btn-hit" data-hit="3B" title="Triple">
+                  <span class="btn-code">3B</span>
+                  <span class="btn-desc">Triple</span>
+                </button>
+                <button class="score-action-btn btn-hit" data-hit="HR" title="Jonrón / Cuadrangular">
+                  <span class="btn-code">HR</span>
+                  <span class="btn-desc">Jonrón</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Outs Group -->
+            <div>
+              <div class="scoring-group-label" style="color:var(--crimson);">
+                <span>🔴</span>
+                <span>Desenlaces de Out</span>
+              </div>
+              <div class="scoring-btn-grid outs-grid" style="margin-top: 0.35rem;">
+                <button class="score-action-btn btn-out" data-out="K" title="Ponche">
+                  <span class="btn-code">K</span>
+                  <span class="btn-desc">Ponche</span>
+                </button>
+                <button class="score-action-btn btn-out" data-out="GO" title="Ground Out / Rolling">
+                  <span class="btn-code">GO</span>
+                  <span class="btn-desc">Rolling</span>
+                </button>
+                <button class="score-action-btn btn-out" data-out="FO" title="Fly Out / Elevado">
+                  <span class="btn-code">FO</span>
+                  <span class="btn-desc">Fly Out</span>
+                </button>
+                <button class="score-action-btn btn-out" data-out="LO" title="Line Out / Línea">
+                  <span class="btn-code">LO</span>
+                  <span class="btn-desc">Línea</span>
+                </button>
+                <button class="score-action-btn btn-out" data-out="FC" title="Fielder's Choice / Bola Ocupada">
+                  <span class="btn-code">FC</span>
+                  <span class="btn-desc">Fielder Choice</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Advances / Other Group -->
+            <div>
+              <div class="scoring-group-label" style="color:var(--amber);">
+                <span>🟡</span>
+                <span>Avances y Otros</span>
+              </div>
+              <div class="scoring-btn-grid advances-grid" style="margin-top: 0.35rem;">
+                <button class="score-action-btn btn-advance" data-advance="BB" title="Base por Bolas">
+                  <span class="btn-code">BB</span>
+                  <span class="btn-desc">Boleto</span>
+                </button>
+                <button class="score-action-btn btn-advance" data-advance="IBB" title="Boleto Intencional">
+                  <span class="btn-code">IBB</span>
+                  <span class="btn-desc">Intencional</span>
+                </button>
+                <button class="score-action-btn btn-advance" data-advance="HBP" title="Golpeado por lanzamiento">
+                  <span class="btn-code">HBP</span>
+                  <span class="btn-desc">Golpeado</span>
+                </button>
+                <button class="score-action-btn btn-advance" data-advance="E" title="Error a la defensiva">
+                  <span class="btn-code">E</span>
+                  <span class="btn-desc">Error</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==================== MODO DETALLADO ==================== -->
+          <div id="detailedModeSection" class="detailed-mode-panel" style="display:none;">
+            
+            <div class="pitcher-tracker-card">
+              <div>
+                <strong>Seguimiento de Pitcheo:</strong>
+                <span id="detailedPitchCount" style="color:var(--cyan); margin-left:6px;">0 lanzamientos</span>
+              </div>
+              <span class="card-pill">Zona 3x3 Interactiva</span>
+            </div>
+
+            <div class="strike-zone-wrapper">
+              
+              <!-- 9-Quadrant Interactive Strike Zone -->
+              <div class="strike-zone-container">
+                <!-- Outer Ball Zones -->
+                <div class="outer-ball-zone zone-top" data-zone="Alta">▲ Alta (Bola)</div>
+                <div class="outer-ball-zone zone-bottom" data-zone="Baja">▼ Baja (Bola)</div>
+                <div class="outer-ball-zone zone-left" data-zone="Adentro">◀ Adentro</div>
+                <div class="outer-ball-zone zone-right" data-zone="Afuera">▶ Afuera</div>
+
+                <div id="strikeZoneGrid" class="strike-zone-grid">
+                  <div class="zone-cell" data-zone="1">1</div>
+                  <div class="zone-cell" data-zone="2">2</div>
+                  <div class="zone-cell" data-zone="3">3</div>
+                  <div class="zone-cell" data-zone="4">4</div>
+                  <div class="zone-cell" data-zone="5">5</div>
+                  <div class="zone-cell" data-zone="6">6</div>
+                  <div class="zone-cell" data-zone="7">7</div>
+                  <div class="zone-cell" data-zone="8">8</div>
+                  <div class="zone-cell" data-zone="9">9</div>
+                  
+                  <!-- Pitch Marker Overlay -->
+                  <div id="pitchMarkersOverlay"></div>
+                </div>
+              </div>
+
+              <!-- Pitch Outcome Type Selectors -->
+              <div class="pitch-controls-column">
+                <button class="btn-pitch-type btn-pitch-ball active" data-pitch-type="ball">
+                  <span>🟢 Bola Fuera</span>
+                  <span style="font-size:0.7rem; color:var(--emerald);">+1 Bola</span>
+                </button>
+                <button class="btn-pitch-type btn-pitch-strike" data-pitch-type="strike_looking">
+                  <span>🟡 Strike Cantado</span>
+                  <span style="font-size:0.7rem; color:var(--amber);">Mirando</span>
+                </button>
+                <button class="btn-pitch-type btn-pitch-strike" data-pitch-type="strike_swinging">
+                  <span>🟠 Strike Abanicado</span>
+                  <span style="font-size:0.7rem; color:var(--amber);">Swinging</span>
+                </button>
+                <button class="btn-pitch-type btn-pitch-foul" data-pitch-type="foul">
+                  <span>🟣 Foul Ball</span>
+                  <span style="font-size:0.7rem; color:var(--violet);">Batazo Foul</span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Bento Col 3: Batter Spotlight & Live Play-by-Play Feed -->
+      <div class="bento-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">⚡</span>
+            <span>Turno y Jugadas en Vivo</span>
+          </h2>
+          <button id="undoPlayBtn" class="btn-nav" style="padding:0.25rem 0.6rem; font-size:0.75rem;" title="Deshacer última anotación">
+            <span>↩️</span>
+            <span>Deshacer</span>
+          </button>
+        </div>
+
+        <!-- Current Batter Spotlight -->
+        <div class="lineup-tracker">
+          <div id="batterSpotlightInfo" class="batter-spotlight">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Chronological Play by Play Log -->
+        <div id="playLogList" class="play-log-container">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Bento Row: Specialized Statistics Panel -->
+    <section class="stats-panel-section">
+      <!-- Navigation Tabs -->
+      <div class="stats-nav-tabs">
+        <button class="stats-tab-btn active" data-tab="pitchers">
+          <span>⚾</span>
+          <span>Estadísticas de Lanzadores</span>
+        </button>
+        <button class="stats-tab-btn" data-tab="catchers">
+          <span>🛡️</span>
+          <span>Estadísticas de Receptores (Catchers)</span>
+        </button>
+        <button class="stats-tab-btn" data-tab="boxscore">
+          <span>📋</span>
+          <span>Box Score Tradicional</span>
+        </button>
+        <button class="stats-tab-btn" data-tab="playbyplay">
+          <span>📜</span>
+          <span>Jugada a Jugada Completo</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div id="statsTabContent">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       MODALS
+       ========================================================================== -->
+
+  <!-- 1. Perfil de Anotador Modal -->
+  <div id="profileModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>👤</span>
+          <span>Perfil del Anotador Oficial</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; align-items:center; gap:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--border-subtle);">
+          <div style="width:65px; height:65px; border-radius:50%; background:linear-gradient(135deg, var(--cyan), var(--violet)); display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:800; color:#0B0E14;">
+            CM
+          </div>
+          <div>
+            <h4 id="profileName" style="font-size:1.2rem; font-weight:800; color:var(--text-primary);">Lic. Carlos Mendoza</h4>
+            <div id="profileRole" style="font-size:0.8rem; color:var(--cyan); font-weight:600;">Anotador Oficial WBSC</div>
+            <div id="profileLicense" style="font-size:0.75rem; color:var(--text-muted);">Licencia: WBSC-2024-89</div>
+            <div id="profileEmail" style="font-size:0.75rem; color:var(--text-muted);">carlos.mendoza@wbsc.org</div>
+          </div>
+        </div>
+
+        <h5 style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-top:0.25rem;">
+          Métricas Acumuladas en Vivo
+        </h5>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.75rem;">
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:0.9rem; border-radius:var(--radius-md); text-align:center;">
+            <div id="metricGames" style="font-size:1.8rem; font-weight:800; color:var(--cyan); line-height:1;">24</div>
+            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.3rem;">Partidos Anotados</div>
+          </div>
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:0.9rem; border-radius:var(--radius-md); text-align:center;">
+            <div id="metricInnings" style="font-size:1.8rem; font-weight:800; color:var(--emerald); line-height:1;">208</div>
+            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.3rem;">Innings Registrados</div>
+          </div>
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:0.9rem; border-radius:var(--radius-md); text-align:center;">
+            <div id="metricPlays" style="font-size:1.8rem; font-weight:800; color:var(--violet); line-height:1;">1,420</div>
+            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.3rem;">Jugadas Procesadas</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="logoutBtn" class="btn-nav" style="border-color:var(--crimson); color:var(--crimson);">
+          Cerrar Sesión
+        </button>
+        <button class="btn-nav btn-primary btn-close-modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Auth / Login Modal -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>🔐</span>
+          <span>Acceso al Sistema Sport Click Stats</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <button id="quickDemoLoginBtn" class="btn-nav btn-primary" style="width:100%; justify-content:center; padding:0.8rem; font-size:0.9rem;">
+          ⚡ Acceso Rápido como Anotador Oficial (Demo)
+        </button>
+
+        <div style="display:flex; align-items:center; gap:0.5rem; color:var(--text-muted); font-size:0.75rem;">
+          <div style="flex:1; height:1px; background:var(--border-subtle);"></div>
+          <span>O INGRESA TUS CREDENCIALES</span>
+          <div style="flex:1; height:1px; background:var(--border-subtle);"></div>
+        </div>
+
+        <form id="loginForm" style="display:flex; flex-direction:column; gap:0.85rem;">
+          <div class="form-group">
+            <label class="form-label">Nombre Completo</label>
+            <input type="text" id="authNameInput" class="form-input" placeholder="Ej. Roberto Alomar" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Credencial / Licencia de Anotador</label>
+            <input type="text" id="authLicenseInput" class="form-input" placeholder="Ej. WBSC Nivel II / Liga Nacional #442" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Correo Electrónico</label>
+            <input type="email" id="authEmailInput" class="form-input" placeholder="anotador@beisbol.com" required>
+          </div>
+          <button type="submit" class="btn-nav btn-primary" style="margin-top:0.5rem; justify-content:center; padding:0.7rem;">
+            Entrar como Anotador
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Módulo de Importación de Liga (URL & Scraping Simulator) -->
+  <div id="importModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>📥</span>
+          <span>Importar Datos de Liga o Torneo</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary);">
+          Ingresa la URL del box score o selecciona una de las series preconfiguradas para extraer de forma automática los rosters, alineaciones titulares 1 al 9, lanzador abridor y receptor.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">URL Oficial del Juego o Torneo</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="url" id="importUrlInput" class="form-input" style="flex:1;" value="https://stats.wbsc.org/leagues/lvbp/live-boxscore">
+            <button id="startScrapeBtn" class="btn-nav btn-primary">
+              Analizar y Cargar
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label" style="margin-bottom:0.4rem; display:block;">Cargar Plantilla Simulada Inmediata:</label>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem;">
+            <button class="btn-nav" data-preset-key="lvbp">
+              <span>🇻🇪</span>
+              <span>LVBP: Caracas vs. Magallanes</span>
+            </button>
+            <button class="btn-nav" data-preset-key="mlb">
+              <span>🇺🇸</span>
+              <span>MLB: Yankees vs. Dodgers</span>
+            </button>
+            <button class="btn-nav" data-preset-key="wbsc">
+              <span>🌐</span>
+              <span>WBSC: Japón vs. Dominicana</span>
+            </button>
+            <button class="btn-nav" data-preset-key="lmb">
+              <span>🇲🇽</span>
+              <span>LMB: Diablos vs. Tigres QR</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Scraping Progress Simulator UI -->
+        <div id="scraperProgressCard" class="scraper-progress-card">
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700;">
+            <span>Simulador de Extracción y Parseo de Datos:</span>
+            <span style="color:var(--cyan);">En Proceso</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="scraperProgressBar" class="progress-bar-fill"></div>
+          </div>
+          <div id="scraperLogList" class="scraper-log-list"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-nav btn-close-modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Historial de Partidos Modal (Guardado y Reanudación) -->
+  <div id="historyModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>📋</span>
+          <span>Historial de Partidos Registrados</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary);">
+          Reanuda cualquier partido guardado previamente para continuar la anotación o consulta su marcador final.
+        </p>
+
+        <div id="historyGamesContainer" class="history-cards-list">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-nav btn-close-modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Modal: Crear Nuevo Partido del Día -->
+  <div id="newGameModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>⚾</span>
+          <span>Crear Nuevo Partido del Día</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="newGameForm" style="display:flex; flex-direction:column; gap:1rem;">
+          
+          <!-- Metadatos del encuentro -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Torneo / Liga</label>
+              <input type="text" id="gameLeagueInput" class="form-input" placeholder="Ej. Torneo Apertura / Liga Mayor" required value="Liga Nacional de Béisbol">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sede / Estadio</label>
+              <input type="text" id="gameVenueInput" class="form-input" placeholder="Ej. Estadio Universitario" required value="Estadio Central">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Fecha del Partido</label>
+              <input type="text" id="gameDateInput" class="form-input" required value="Hoy">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Entradas Oficiales (Innings)</label>
+              <select id="gameInningsInput" class="form-input" style="cursor:pointer;">
+                <option value="9">9 Entradas (Béisbol Adulto / Profesional)</option>
+                <option value="7">7 Entradas (Sóftbol / Menor / Doble Juego)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Definición de Equipos -->
+          <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-top:0.4rem;">
+            Configuración de Equipos
+          </div>
+
+          <div class="form-row-2">
+            
+            <!-- Equipo Visitante -->
+            <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:1rem; border-radius:var(--radius-md); display:flex; flex-direction:column; gap:0.6rem;">
+              <div style="font-weight:700; color:var(--cyan); font-size:0.9rem; display:flex; align-items:center; gap:0.4rem;">
+                <span>✈️</span>
+                <span>Equipo Visitante (Batea primero)</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Ciudad o Prefijo</label>
+                <input type="text" id="visCityInput" class="form-input" placeholder="Ej. Águilas del" required value="Águilas del">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nombre del Equipo</label>
+                <input type="text" id="visNameInput" class="form-input" placeholder="Ej. Zulia" required value="Zulia">
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.5rem;">
+                <div class="form-group">
+                  <label class="form-label">Abrev.</label>
+                  <input type="text" id="visAbbrInput" class="form-input" maxlength="4" placeholder="ZUL" required value="ZUL">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Color</label>
+                  <input type="color" id="visColorInput" class="form-input" style="padding:2px; height:38px; cursor:pointer;" value="#EAB308">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Logo / Emoji</label>
+                  <input type="text" id="visLogoInput" class="form-input" maxlength="4" value="🦅">
+                </div>
+              </div>
+            </div>
+
+            <!-- Equipo Home Club -->
+            <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:1rem; border-radius:var(--radius-md); display:flex; flex-direction:column; gap:0.6rem;">
+              <div style="font-weight:700; color:var(--emerald); font-size:0.9rem; display:flex; align-items:center; gap:0.4rem;">
+                <span>🏠</span>
+                <span>Equipo Home Club (Cierra entrada)</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Ciudad o Prefijo</label>
+                <input type="text" id="homeCityInput" class="form-input" placeholder="Ej. Cardenales de" required value="Cardenales de">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nombre del Equipo</label>
+                <input type="text" id="homeNameInput" class="form-input" placeholder="Ej. Lara" required value="Lara">
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.5rem;">
+                <div class="form-group">
+                  <label class="form-label">Abrev.</label>
+                  <input type="text" id="homeAbbrInput" class="form-input" maxlength="4" placeholder="LAR" required value="LAR">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Color</label>
+                  <input type="color" id="homeColorInput" class="form-input" style="padding:2px; height:38px; cursor:pointer;" value="#DC2626">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Logo / Emoji</label>
+                  <input type="text" id="homeLogoInput" class="form-input" maxlength="4" value="🐦">
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+            <button type="button" id="quickSampleGameBtn" class="btn-nav" style="font-size:0.75rem;">
+              ⚡ Cargar Ejemplo Rápido
+            </button>
+            <div style="display:flex; gap:0.5rem;">
+              <button type="button" class="btn-nav btn-close-modal">Cancelar</button>
+              <button type="submit" class="btn-nav btn-primary">
+                Crear Partido y Configurar Lineup ➡️
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Modal: Gestor de Rosters y Lineup Titular -->
+  <div id="lineupModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 820px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>👥</span>
+          <span>Configurar Rosters, Batería y Lineup (1 al 9)</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Pestañas de Selección de Equipo -->
+        <div class="lineup-team-tabs">
+          <button id="lineupTabVis" class="lineup-tab-pill active">
+            <span>✈️ Visitante:</span>
+            <span id="lineupVisTeamLabel">Visitante</span>
+          </button>
+          <button id="lineupTabHome" class="lineup-tab-pill">
+            <span>🏠 Home Club:</span>
+            <span id="lineupHomeTeamLabel">Home Club</span>
+          </button>
+        </div>
+
+        <!-- Batería Titular (Lanzador y Receptor) -->
+        <div class="battery-config-box">
+          <!-- Pitcher Abridor -->
+          <div>
+            <div style="font-weight:700; color:var(--cyan); font-size:0.85rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.35rem;">
+              <span>⚾</span>
+              <span>Lanzador Abridor (SP)</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:0.5rem;">
+              <div>
+                <label class="form-label">Nombre</label>
+                <input type="text" id="lineupSpName" class="lineup-input" placeholder="Nombre lanzador">
+              </div>
+              <div>
+                <label class="form-label">Dorsal #</label>
+                <input type="number" id="lineupSpNum" class="lineup-input" min="0" max="99" placeholder="45">
+              </div>
+              <div>
+                <label class="form-label">Mano</label>
+                <select id="lineupSpHand" class="lineup-select" style="width:100%;">
+                  <option value="R">Derecho (R)</option>
+                  <option value="L">Zurdo (L)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Receptor Titular -->
+          <div>
+            <div style="font-weight:700; color:var(--emerald); font-size:0.85rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.35rem;">
+              <span>🛡️</span>
+              <span>Receptor Titular (C)</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:0.5rem;">
+              <div>
+                <label class="form-label">Nombre</label>
+                <input type="text" id="lineupCName" class="lineup-input" placeholder="Nombre receptor">
+              </div>
+              <div>
+                <label class="form-label">Dorsal #</label>
+                <input type="number" id="lineupCNum" class="lineup-input" min="0" max="99" placeholder="13">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla Orden al Bate 1 al 9 -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+          <h4 style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">
+            Orden al Bate Titular (Lineup 1 al 9)
+          </h4>
+          <button type="button" id="fillSampleLineupBtn" class="btn-nav" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+            ⚡ Cargar Nombres de Ejemplo
+          </button>
+        </div>
+
+        <div class="table-responsive-wrapper" style="max-height:300px; overflow-y:auto;">
+          <table class="lineup-editor-table">
+            <thead>
+              <tr>
+                <th style="width:40px; text-align:center;">#</th>
+                <th>Nombre del Jugador</th>
+                <th style="width:90px;">Dorsal</th>
+                <th style="width:130px;">Posición</th>
+              </tr>
+            </thead>
+            <tbody id="lineupRowsContainer">
+              <!-- Generado dinámicamente con las 9 filas -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Sección de Banca y Sustitutos Disponibles -->
+        <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border-subtle);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <div>
+              <h4 style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--cyan); display:flex; align-items:center; gap:0.35rem;">
+                <span>🪑</span>
+                <span>Banca y Sustitutos Disponibles (<span id="benchTeamLabel">Visitante</span>)</span>
+              </h4>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Jugadores de reserva para bateadores emergentes (PH), corredores (PR) y relevistas (RP).</div>
+            </div>
+            <button type="button" id="fillSampleBenchBtn" class="btn-nav" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+              ⚡ Cargar Sustitutos de Ejemplo
+            </button>
+          </div>
+
+          <!-- Formulario rápido para agregar sustituto manual -->
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:0.75rem; border-radius:var(--radius-md); margin-bottom:0.75rem; display:grid; grid-template-columns: 2fr 1fr 2fr 1fr auto; gap:0.5rem; align-items:end;">
+            <div>
+              <label class="form-label">Nombre del Sustituto</label>
+              <input type="text" id="benchPlayerName" class="lineup-input" placeholder="Ej. Juan Pérez">
+            </div>
+            <div>
+              <label class="form-label">Dorsal</label>
+              <input type="number" id="benchPlayerNum" class="lineup-input" min="0" max="99" placeholder="23">
+            </div>
+            <div>
+              <label class="form-label">Rol / Posición</label>
+              <select id="benchPlayerRole" class="lineup-select" style="width:100%;">
+                <option value="PH">Bateador Emergente (PH)</option>
+                <option value="PR">Corredor Emergente (PR)</option>
+                <option value="RP">Lanzador Relevista (RP)</option>
+                <option value="C">Receptor Suplente (C)</option>
+                <option value="INF">Infield Suplente (INF)</option>
+                <option value="OF">Outfield Suplente (OF)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Mano</label>
+              <select id="benchPlayerHand" class="lineup-select" style="width:100%;">
+                <option value="R">R (Der)</option>
+                <option value="L">L (Zur)</option>
+              </select>
+            </div>
+            <button type="button" id="addBenchPlayerBtn" class="btn-nav btn-primary" style="padding:0.45rem 0.8rem; font-size:0.8rem; height:36px;">
+              ➕ Agregar
+            </button>
+          </div>
+
+          <!-- Tabla de sustitutos actuales -->
+          <div class="table-responsive-wrapper" style="max-height:200px; overflow-y:auto;">
+            <table class="lineup-editor-table">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">#</th>
+                  <th>Nombre del Sustituto</th>
+                  <th style="width:90px;">Dorsal</th>
+                  <th style="width:160px;">Rol</th>
+                  <th style="width:70px;">Mano</th>
+                  <th style="width:60px; text-align:center;">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="benchRowsContainer">
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-nav btn-close-modal">Cerrar</button>
+        <button type="button" id="saveLineupBtn" class="btn-nav btn-primary">
+          💾 Guardar y Aplicar al Partido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Exportar Box Score Modal -->
+  <div id="exportModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>📊</span>
+          <span>Exportar Box Score y Reporte</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary);">
+          Selecciona el formato para descargar o compartir la hoja oficial del encuentro:
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:1rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-weight:700; color:var(--text-primary);">📄 Documento Oficial PDF / Impresión</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Hoja de anotación completa con line score, lanzadores, catchers y bateadores en alto contraste.</div>
+            </div>
+            <button id="exportPdfBtn" class="btn-nav btn-primary">
+              Imprimir / PDF
+            </button>
+          </div>
+
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:1rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-weight:700; color:var(--text-primary);">💾 Archivo de Datos JSON</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Estructura de datos completa, play-by-play cronológico y métricas para importar o respaldar.</div>
+            </div>
+            <button id="exportJsonBtn" class="btn-nav" style="border-color:var(--cyan); color:var(--cyan);">
+              Descargar JSON
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-nav btn-close-modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Modal: Realizar Sustitución en Vivo -->
+  <div id="substitutionModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>🔄</span>
+          <span>Realizar Sustitución en Vivo</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="substitutionForm" style="display:flex; flex-direction:column; gap:1rem;">
+          
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Equipo de la Sustitución</label>
+              <select id="subTeamSelect" class="form-input" style="cursor:pointer;">
+                <!-- Populated via JS with active teams -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de Sustitución</label>
+              <select id="subTypeSelect" class="form-input" style="cursor:pointer;">
+                <option value="PH">Bateador Emergente (Pinch Hitter - PH)</option>
+                <option value="PR">Corredor Emergente (Pinch Runner - PR)</option>
+                <option value="RP">Cambio de Lanzador (Relevista - RP)</option>
+                <option value="DEF">Cambio Defensivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="subOutgoingLabel">Jugador que Sale</label>
+            <select id="subOutgoingSelect" class="form-input" style="cursor:pointer;">
+              <!-- Populated dynamically based on sub type -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Jugador Sustituto (Entrante)</label>
+            <select id="subIncomingSelect" class="form-input" style="cursor:pointer;">
+              <!-- Populated from team bench -->
+            </select>
+          </div>
+
+          <!-- Opción alternativa manual si no está en la banca -->
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:0.75rem; border-radius:var(--radius-md);">
+            <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem;">
+              O ingresar sustituto manualmente si no figura en la banca:
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:0.5rem;">
+              <input type="text" id="subManualName" class="form-input" placeholder="Nombre completo">
+              <input type="number" id="subManualNum" class="form-input" min="0" max="99" placeholder="Dorsal #">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+            <button type="button" class="btn-nav btn-close-modal">Cancelar</button>
+            <button type="submit" class="btn-nav btn-primary">
+              ✅ Confirmar Sustitución
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Modal: Puntos de Control (Checkpoints) -->
+  <div id="checkpointsModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>📍</span>
+          <span>Puntos de Control (Checkpoints del Juego)</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Formulario nuevo checkpoint -->
+        <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:1rem; border-radius:var(--radius-md); display:flex; flex-direction:column; gap:0.5rem;">
+          <label class="form-label">Crear un Nuevo Checkpoint en este Instante:</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="checkpointCustomNote" class="form-input" style="flex:1;" placeholder="Nota opcional (ej. Antes de jugada de revisión)">
+            <button type="button" id="modalSaveCheckpointBtn" class="btn-nav btn-primary">
+              📍 Guardar Checkpoint
+            </button>
+          </div>
+        </div>
+
+        <h4 style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-top:0.5rem;">
+          Checkpoints Guardados en este Encuentro
+        </h4>
+
+        <div id="checkpointsListContainer" style="display:flex; flex-direction:column; gap:0.5rem; max-height:280px; overflow-y:auto;">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-nav btn-close-modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Modal: Conexión con Supabase Cloud -->
+  <div id="supabaseModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>☁️</span>
+          <span>Conexión con Supabase (Base de Datos en la Nube)</span>
+        </h3>
+        <button class="btn-icon btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary);">
+          Conecta tu proyecto de Supabase para respaldar tus partidos, estadísticas y checkpoints en tiempo real en la nube PostgreSQL.
+        </p>
+
+        <form id="supabaseConfigForm" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <div class="form-group">
+            <label class="form-label">Project URL de Supabase</label>
+            <input type="url" id="sbUrlInput" class="form-input" placeholder="https://xxxxxxxxxxxxxxxx.supabase.co" required>
+            <span style="font-size:0.7rem; color:var(--text-muted);">Encuéntralo en Supabase -> Project Settings -> API -> Project URL</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">API Key Pública (anon / public)</label>
+            <input type="text" id="sbKeyInput" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+            <span style="font-size:0.7rem; color:var(--text-muted);">Encuéntralo en Supabase -> Project Settings -> API -> Project API keys (anon/public)</span>
+          </div>
+
+          <div id="sbTestStatus" style="display:none; padding:0.6rem 0.8rem; border-radius:var(--radius-sm); font-size:0.82rem; font-weight:600;"></div>
+
+          <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); padding:0.8rem; border-radius:var(--radius-md); font-size:0.78rem; color:var(--text-secondary);">
+            💡 <strong>Esquema SQL listo:</strong> En la carpeta <code>materiales/supabase_schema.sql</code> tienes el código listo para crear las tablas <code>games</code>, <code>checkpoints</code> y <code>scorer_profiles</code> con sus políticas RLS.
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+            <button type="button" id="testSupabaseBtn" class="btn-nav" style="border-color:var(--cyan); color:var(--cyan);">
+              🧪 Probar Conexión
+            </button>
+            <div style="display:flex; gap:0.5rem;">
+              <button type="button" class="btn-nav btn-close-modal">Cancelar</button>
+              <button type="submit" class="btn-nav btn-primary">
+                💾 Guardar y Conectar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie de Página (Footer) -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>Sport Click Stats 2026 - Todos los derechos reservados</div>
+      <div class="footer-dev">
+        Desarrollado por 
+        <a href="https://wa.me/584122053591" target="_blank" rel="noopener noreferrer" class="dev-link" title="Contactar a Henry Macho en WhatsApp (+58 412-2053591)">
+          <span>Henry Macho</span>
+          <span class="wa-icon">💬</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/mockLeagues.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/baseballRules.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

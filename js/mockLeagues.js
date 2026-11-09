@@ -1,0 +1,440 @@
+/**
+ * Sport Click Stats - Mock Leagues & Rosters Database
+ * Preconfigured presets for URL simulation: LVBP, MLB, WBSC, LMB
+ */
+
+const MOCK_LEAGUES = {
+  lvbp: {
+    id: "lvbp-clásico-01",
+    name: "LVBP - Liga Venezolana de Béisbol Profesional",
+    tournament: "Temporada Regular - Clásico de los Eternos Rivales",
+    venue: "Estadio Monumental Simón Bolívar, Caracas",
+    visitor: {
+      id: "magallanes",
+      city: "Navegantes del",
+      name: "Magallanes",
+      abbreviation: "MAG",
+      primaryColor: "#0A2540",
+      secondaryColor: "#F59E0B",
+      logoBadge: "⚓",
+      startingPitcher: {
+        id: "mag-p-01",
+        name: "Erick Leal",
+        number: 45,
+        hand: "R",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "mag-c-01",
+        name: "Arturo Nieto",
+        number: 22,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "mag-1", order: 1, name: "Carlos Rodríguez", number: 12, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".315" },
+        { id: "mag-2", order: 2, name: "Wilmer Flores", number: 4, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".298" },
+        { id: "mag-3", order: 3, name: "Renato Núñez", number: 39, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".305" },
+        { id: "mag-4", order: 4, name: "Alberth Martínez", number: 31, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".284" },
+        { id: "mag-5", order: 5, name: "Peter O'Brien", number: 26, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".260" },
+        { id: "mag-6", order: 6, name: "Tucupita Marcano", number: 8, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".275" },
+        { id: "mag-7", order: 7, name: "Rayder Ascanio", number: 16, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".250" },
+        { id: "mag-8", order: 8, name: "Angelo Castellano", number: 7, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".265" },
+        { id: "mag-9", order: 9, name: "Arturo Nieto", number: 22, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".240" }
+      ],
+      bench: [
+        { id: "mag-b1", name: "Romer Cuadrado", number: 18, pos: "OF", role: "PH", hand: "R" },
+        { id: "mag-b2", name: "José Gómez", number: 3, pos: "INF", role: "PR", hand: "R" },
+        { id: "mag-b3", name: "Anthony Vizcaya", number: 38, pos: "RP", role: "RP", hand: "R" },
+        { id: "mag-b4", name: "Luis Martínez", number: 48, pos: "RP", role: "RP", hand: "R" },
+        { id: "mag-b5", name: "René Pinto", number: 50, pos: "C", role: "C", hand: "R" }
+      ]
+    },
+    home: {
+      id: "leones",
+      city: "Leones del",
+      name: "Caracas",
+      abbreviation: "CAR",
+      primaryColor: "#EAB308",
+      secondaryColor: "#000000",
+      logoBadge: "🦁",
+      startingPitcher: {
+        id: "car-p-01",
+        name: "Jhoulys Chacín",
+        number: 27,
+        hand: "R",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "car-c-01",
+        name: "Salvador Pérez",
+        number: 13,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "car-1", order: 1, name: "Harold Castro", number: 30, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".330" },
+        { id: "car-2", order: 2, name: "Wilfredo Tovar", number: 18, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".310" },
+        { id: "car-3", order: 3, name: "José Rondón", number: 24, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".320" },
+        { id: "car-4", order: 4, name: "Salvador Pérez", number: 13, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".345" },
+        { id: "car-5", order: 5, name: "Oswaldo Arcia", number: 37, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".290" },
+        { id: "car-6", order: 6, name: "Aldrem Corredor", number: 41, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".285" },
+        { id: "car-7", order: 7, name: "Gabriel Noriega", number: 2, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".300" },
+        { id: "car-8", order: 8, name: "Alexander Palma", number: 22, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".275" },
+        { id: "car-9", order: 9, name: "Lenyn Sosa", number: 5, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".280" }
+      ],
+      bench: [
+        { id: "car-b1", name: "César Hernández", number: 16, pos: "INF", role: "PH", hand: "S" },
+        { id: "car-b2", name: "Carlos Tocci", number: 33, pos: "OF", role: "PR", hand: "R" },
+        { id: "car-b3", name: "Miguel Socolovich", number: 45, pos: "RP", role: "RP", hand: "R" },
+        { id: "car-b4", name: "Norwith Gudiño", number: 61, pos: "RP", role: "RP", hand: "R" },
+        { id: "car-b5", name: "Jhonny Pereda", number: 38, pos: "C", role: "C", hand: "R" }
+      ]
+    }
+  },
+
+  mlb: {
+    id: "mlb-ws-01",
+    name: "MLB - Major League Baseball",
+    tournament: "World Series Game 7 Championship",
+    venue: "Yankee Stadium, Bronx, New York",
+    visitor: {
+      id: "dodgers",
+      city: "Los Angeles",
+      name: "Dodgers",
+      abbreviation: "LAD",
+      primaryColor: "#005A9C",
+      secondaryColor: "#EF3E42",
+      logoBadge: "⚾",
+      startingPitcher: {
+        id: "lad-p-01",
+        name: "Yoshinobu Yamamoto",
+        number: 18,
+        hand: "R",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "lad-c-01",
+        name: "Will Smith",
+        number: 16,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "lad-1", order: 1, name: "Shohei Ohtani", number: 17, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".310" },
+        { id: "lad-2", order: 2, name: "Mookie Betts", number: 50, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".289" },
+        { id: "lad-3", order: 3, name: "Freddie Freeman", number: 5, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".295" },
+        { id: "lad-4", order: 4, name: "Teoscar Hernández", number: 37, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".272" },
+        { id: "lad-5", order: 5, name: "Max Muncy", number: 13, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".240" },
+        { id: "lad-6", order: 6, name: "Will Smith", number: 16, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".258" },
+        { id: "lad-7", order: 7, name: "Tommy Edman", number: 25, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".265" },
+        { id: "lad-8", order: 8, name: "Gavin Lux", number: 9, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".251" },
+        { id: "lad-9", order: 9, name: "Miguel Rojas", number: 11, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".283" }
+      ]
+    },
+    home: {
+      id: "yankees",
+      city: "New York",
+      name: "Yankees",
+      abbreviation: "NYY",
+      primaryColor: "#003087",
+      secondaryColor: "#E4002C",
+      logoBadge: "⚾",
+      startingPitcher: {
+        id: "nyy-p-01",
+        name: "Gerrit Cole",
+        number: 45,
+        hand: "R",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "nyy-c-01",
+        name: "Austin Wells",
+        number: 28,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "nyy-1", order: 1, name: "Gleyber Torres", number: 25, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".257" },
+        { id: "nyy-2", order: 2, name: "Juan Soto", number: 22, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".288" },
+        { id: "nyy-3", order: 3, name: "Aaron Judge", number: 99, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".322" },
+        { id: "nyy-4", order: 4, name: "Giancarlo Stanton", number: 27, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".245" },
+        { id: "nyy-5", order: 5, name: "Jazz Chisholm Jr.", number: 13, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".256" },
+        { id: "nyy-6", order: 6, name: "Anthony Rizzo", number: 48, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".228" },
+        { id: "nyy-7", order: 7, name: "Anthony Volpe", number: 11, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".243" },
+        { id: "nyy-8", order: 8, name: "Austin Wells", number: 28, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".229" },
+        { id: "nyy-9", order: 9, name: "Alex Verdugo", number: 24, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".233" }
+      ]
+    }
+  },
+
+  wbsc: {
+    id: "wbsc-classic-01",
+    name: "WBSC Premier 12 / Clásico Mundial",
+    tournament: "Semifinal Internacional WBSC",
+    venue: "Tokyo Dome, Tokyo, Japón",
+    visitor: {
+      id: "dominicana",
+      city: "República",
+      name: "Dominicana",
+      abbreviation: "DOM",
+      primaryColor: "#002F6C",
+      secondaryColor: "#CE1126",
+      logoBadge: "🇩🇴",
+      startingPitcher: {
+        id: "dom-p-01",
+        name: "Framber Valdez",
+        number: 59,
+        hand: "L",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "dom-c-01",
+        name: "Gary Sánchez",
+        number: 24,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "dom-1", order: 1, name: "Julio Rodríguez", number: 44, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".295" },
+        { id: "dom-2", order: 2, name: "Fernando Tatis Jr.", number: 23, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".282" },
+        { id: "dom-3", order: 3, name: "Manny Machado", number: 13, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".304" },
+        { id: "dom-4", order: 4, name: "Rafael Devers", number: 11, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".301" },
+        { id: "dom-5", order: 5, name: "Vladimir Guerrero Jr.", number: 27, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".323" },
+        { id: "dom-6", order: 6, name: "Teoscar Hernández", number: 37, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".275" },
+        { id: "dom-7", order: 7, name: "Willy Adames", number: 1, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".251" },
+        { id: "dom-8", order: 8, name: "Ketel Marte", number: 4, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".292" },
+        { id: "dom-9", order: 9, name: "Gary Sánchez", number: 24, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".230" }
+      ]
+    },
+    home: {
+      id: "japon",
+      city: "Samurai",
+      name: "Japón",
+      abbreviation: "JPN",
+      primaryColor: "#FFFFFF",
+      secondaryColor: "#BC002D",
+      logoBadge: "🇯🇵",
+      startingPitcher: {
+        id: "jpn-p-01",
+        name: "Roki Sasaki",
+        number: 14,
+        hand: "R",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "jpn-c-01",
+        name: "Takuya Kai",
+        number: 10,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "jpn-1", order: 1, name: "Lars Nootbaar", number: 23, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".280" },
+        { id: "jpn-2", order: 2, name: "Kensuke Kondoh", number: 8, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".312" },
+        { id: "jpn-3", order: 3, name: "Shohei Ohtani", number: 16, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".333" },
+        { id: "jpn-4", order: 4, name: "Munetaka Murakami", number: 55, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".290" },
+        { id: "jpn-5", order: 5, name: "Masataka Yoshida", number: 34, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".320" },
+        { id: "jpn-6", order: 6, name: "Kazuma Okamoto", number: 25, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".278" },
+        { id: "jpn-7", order: 7, name: "Tetsuto Yamada", number: 1, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".265" },
+        { id: "jpn-8", order: 8, name: "Sosuke Genda", number: 2, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".250" },
+        { id: "jpn-9", order: 9, name: "Takuya Kai", number: 10, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".225" }
+      ]
+    }
+  },
+
+  lmb: {
+    id: "lmb-guerra-01",
+    name: "LMB - Liga Mexicana de Béisbol",
+    tournament: "Serie de Campeonato de la Zona Sur",
+    venue: "Estadio Alfredo Harp Helú, Ciudad de México",
+    visitor: {
+      id: "tigres",
+      city: "Tigres de",
+      name: "Quintana Roo",
+      abbreviation: "TIG",
+      primaryColor: "#002F6C",
+      secondaryColor: "#FF7300",
+      logoBadge: "🐯",
+      startingPitcher: {
+        id: "tig-p-01",
+        name: "Raúl Zoé Carrillo",
+        number: 33,
+        hand: "R",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "tig-c-01",
+        name: "Alexis Wilson",
+        number: 12,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "tig-1", order: 1, name: "Carlos Figueroa", number: 14, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".302" },
+        { id: "tig-2", order: 2, name: "Reynaldo Rodríguez", number: 23, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".320" },
+        { id: "tig-3", order: 3, name: "Ángel Erro", number: 9, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".285" },
+        { id: "tig-4", order: 4, name: "David Rodríguez", number: 28, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".278" },
+        { id: "tig-5", order: 5, name: "Alexis Wilson", number: 12, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".264" },
+        { id: "tig-6", order: 6, name: "Manuel Orduño", number: 17, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".270" },
+        { id: "tig-7", order: 7, name: "Tito Polo", number: 7, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".282" },
+        { id: "tig-8", order: 8, name: "Edson García", number: 5, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".250" },
+        { id: "tig-9", order: 9, name: "Jorge Rivera", number: 2, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".240" }
+      ]
+    },
+    home: {
+      id: "diablos",
+      city: "Diablos Rojos del",
+      name: "México",
+      abbreviation: "MEX",
+      primaryColor: "#CC0000",
+      secondaryColor: "#000000",
+      logoBadge: "👹",
+      startingPitcher: {
+        id: "mex-p-01",
+        name: "Trevor Bauer",
+        number: 96,
+        hand: "R",
+        ip: "0.0",
+        ipDec: 0,
+        h: 0,
+        r: 0,
+        er: 0,
+        bb: 0,
+        so: 0,
+        hr: 0,
+        pitches: 0,
+        era: "0.00",
+        whip: "0.00"
+      },
+      startingCatcher: {
+        id: "mex-c-01",
+        name: "Patrick Mazeika",
+        number: 4,
+        innings: "0.0",
+        cs: 0,
+        sb: 0,
+        csPct: "0.0%",
+        pb: 0,
+        e: 0,
+        cera: "0.00"
+      },
+      lineup: [
+        { id: "mex-1", order: 1, name: "Franklin Barreto", number: 1, pos: "CF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".340" },
+        { id: "mex-2", order: 2, name: "Robinson Canó", number: 22, pos: "2B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".431" },
+        { id: "mex-3", order: 3, name: "José Pirela", number: 7, pos: "LF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".330" },
+        { id: "mex-4", order: 4, name: "Julián Ornelas", number: 23, pos: "RF", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".315" },
+        { id: "mex-5", order: 5, name: "José Marmolejos", number: 15, pos: "1B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".300" },
+        { id: "mex-6", order: 6, name: "Patrick Mazeika", number: 4, pos: "C", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".280" },
+        { id: "mex-7", order: 7, name: "Juan Carlos Gamboa", number: 19, pos: "SS", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".295" },
+        { id: "mex-8", order: 8, name: "Moisés Gutiérrez", number: 8, pos: "3B", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".275" },
+        { id: "mex-9", order: 9, name: "Carlos Sepúlveda", number: 13, pos: "DH", ab: 0, r: 0, h: 0, "2b": 0, "3b": 0, hr: 0, rbi: 0, bb: 0, so: 0, avg: ".285" }
+      ]
+    }
+  }
+};
